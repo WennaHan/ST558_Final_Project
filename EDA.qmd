@@ -5,41 +5,176 @@ editor: visual
 ---
 
 ## Introduction
-You should have an introduction section that
-• briefly describes the data and the variables you have to work with (just discuss the ones you’ll investigate use in your analysis).
-• describes the purpose of your EDA and ultimate goal of modeling.
 
-For this project, we will analyze a Diabetes Health Indicators Dataset: https://www.kaggle.com/datasets/alexteboul/diabetes-health-indicators-dataset. Specifically, the diabetes_binary_health_indicators_BRFSS2015.csv data.
+In this study, we utilize the diabetes_binary_health_indicators_BRFSS2015.csv data (from https://www.kaggle.com/datasets/alexteboul/diabetes-health-indicators-dataset) to investigate the relationships between diabetes status and a range of health-related variables.
+
+The dataset comprises 218,334 individuals without diabetes and 35,346 individuals with diabetes, encompassing various demographic, behavioral, and health status indicators. The response variable is Diabetes_binary, which represent whether a person has diabetes or not. The data has other 21 variables as potential predictors. For example, whether an individual has high blood pressure (**HighBP**), whether an individual has high cholesterol (**HighChol**), whether an individual has ever had their cholesterol checked (**CholCheck**), Body Mass Index (**BMI**), whether an individual is a current smoker (**Smoker**), whether an individual has ever had a stroke (**Stroke**), whether an individual has ever had heart disease or a heart attack (**HeartDiseaseorAttack**), whether an individual has engaged in physical activity in the past month (**PhysActivity**), whether an individual consumes fruits daily (**Fruits**), whether an individual consumes vegetables daily (**Veggies**), whether an individual engages in heavy alcohol consumption (**HvyAlcoholConsump**), whether an individual has access to healthcare coverage (**AnyHealthcare**), whether cost has prevented an individual from visiting a doctor in the past year (**NoDocbcCost**), general health (**GenHlth**), mental health (**MentHlth**), physical health (**PhysHlth**), whether an individual has difficulty walking or climbing stairs (**DiffWalk**), **age**, **sex**, **income**, and **education** level.
+
+The primary purpose of the exploratory data analysis is to uncover patterns, relationships, and potential factors associated with diabetes. By examining the distribution of these variables and their relationships with diabetes status, we aim to identify key indicators that might contribute to the presence of diabetes. The ultimate goal of our modeling efforts is to develop a predictive model that can accurately classify individuals as having diabetes or not based on their health and demographic profiles. This model can be valuable for early detection and prevention strategies, allowing healthcare providers to identify at-risk individuals and implement targeted interventions to manage or mitigate the risk of diabetes.
+
+## load necessary packages
+
+```{r}
+library(tidyverse)
+library(caret)
+library(corrplot)
+library(dplyr)
+```
 
 ## Data
 
-Use a relative path to import the data. You likely want to convert a lot of the variables to factors with
-meaningful level names.
-Check on missingness, etc.
+read in data and check data structure.
 
-Read data and correct the data type for each variable:
 ```{r}
-data <- read.csv("diabetes_binary_health_indicators_BRFSS2015.csv") # read data
-str(data) # view data structure
+# read data with relative path
+data <- read.csv("./diabetes_binary_health_indicators_BRFSS2015.csv") 
 
-# select variables that should be character type
-No_character<-c(1:4, 6:14,18,19) 
-# correct the data type
-data [,No_character] <- lapply(data[,No_character], as.character) 
+# view data structure
+str(data)
+
+# check missingness
+colSums(is.na(data))
+```
+
+The data has been read successfully and no missing values were observed. However, many variables are coded numerically but they should be categorical data. Let's convert those variables to factors with meaningful level names.
+
+```{r}
+# select variables that should be converted to 0/1 coded factors
+No_factor<-c(1:4, 6:14, 18) 
+
+# Define the levels and labels
+levels_0_1 <- c(0, 1)
+labels_no_yes <- c("no", "yes")
+
+# Convert the selected variables to factors with levels 0 and 1 and labels No and Yes
+data[, No_factor] <- lapply(data[, No_factor], function(x) {
+  factor(x, levels = levels_0_1, labels = labels_no_yes)
+})
+
+# Convert demographic variables to factors with labels
+data <- data |>
+  mutate (Sex=factor(Sex, levels=c(0,1), labels=c("female","male")),
+          Age=factor(Age, levels=c(1:13), labels=c("18-24","25-29","30-34",
+                                                   "35-39","40-44","45-49",
+                                                   "50-54","55-59","60-64",
+                                                   "65-69","70-74","75-79",
+                                                   "80 or older")),
+          Education=factor(Education, levels=c(1:6), 
+                           labels=c("Never attended school or only kindergarten",
+                           "Elementary", "Some high school", "High school graduate",
+                           "Some college or technical school", "College graduate")),
+          Income=factor(Income, levels=c(1:8), labels=c("less than $10,000",
+                                                        "$10,000 to less than $15,000",
+                                                        "$15,000 to less than $20,000",
+                                                        "$20,000 to less than $25,000",
+                                                        "$25,000 to less than $35,000",
+                                                        "$35,000 to less than $50,000",
+                                                        "$50,000 to less than $75,000",
+                                                        "$75,000 or more")))
 str(data) # check data structure
+summary(data) # summarize data
 ```
 
-## Summarizations
-You should then produce meaningful summary statistics and plots about the data you are working with
-(especially as it relates to your response).
-Although a best practice would be to split the data at hand into a training and testing set first, go ahead
-and do your EDA on the full data.
-Be sure to have a narrative about what you are exploring and what the summaries and graphs
-you created say about the relationships in your data.
+## EDA & Summarizations
+
+Summarize data and do some exploratory data analysis. First, let's focus on categorical variables:
 
 ```{r}
-#| echo: false
-2 * 2
+# Plotting function for categorical variables
+plot_categorical <- function(var) {
+  ggplot(data, aes_string(x = var, fill = "Diabetes_binary")) +
+    geom_bar(position = "dodge") +
+    labs(title = paste("Distribution of", var, "by Diabetes_binary"), x = var, y = "Count") +
+    theme_minimal()
+}
+
+# List of categorical variables
+categorical_vars <- c("HighBP", "HighChol", "CholCheck", "Smoker", "Stroke",
+                      "HeartDiseaseorAttack", "PhysActivity", "Fruits", 
+                      "Veggies", "HvyAlcoholConsump", "AnyHealthcare",
+                      "NoDocbcCost", "DiffWalk", "Age", "Sex", "Education", "Income")
+
+# Plot each categorical variable
+for (var in categorical_vars) {
+  print(plot_categorical(var))
+}
 ```
+
+Based on the above plots, we can find potential drivers of Diabetes_binary include:\
+- **HighBP**:A higher proportion of individuals with diabetes have high blood pressure compared to those without diabetes.\
+- **HighChol**: High cholesterol is more prevalent among those with diabetes.\
+- **CholCheck**: Most individuals, both with and without diabetes, have had their cholesterol checked, but it is slightly higher among those with diabetes.\
+- **Stroke**: Stroke is more common in individuals with diabetes compared to those without.\
+- **HeartDiseaseorAttack**: Heart disease or attack is more common among individuals with diabetes.\
+- **PhysActivity**: Physical activity is less common among individuals with diabetes.\
+- **Fruits**: Lower consumption of fruits is associated with diabetes.\
+- **Veggies**: Lower consumption of vegetables is associated with diabetes.\
+- **HvyAlcoholConsump**: Heavy alcohol consumption is less common among individuals with diabetes.\
+- **DiffWalk**: Difficulty walking is more common among individuals with diabetes.\
+- **Age**: More elder people have diabetes than younger people.\
+- **Education**: Among those with high education level, less portion of people got diabete.\
+- **Income**: Diabetes is more common among individuals with low income.
+
+Then, let's plot the numeric variables:
+
+```{r}
+# Plotting function for continuous variables
+plot_continuous <- function(var) {
+  ggplot(data, aes_string(x = "Diabetes_binary", y = var, fill = "Diabetes_binary")) +
+    geom_boxplot() +
+    labs(title = paste("Boxplot of", var, "by Diabetes_binary"), x = "Diabetes_binary", y = var) +
+    theme_minimal()
+}
+
+# List of continuous variables
+continuous_vars <- c("BMI", "GenHlth", "MentHlth", "PhysHlth")
+
+# Plot each continuous variable
+for (var in continuous_vars) {
+  print(plot_continuous(var))
+}
+```
+
+Based on the above plots, we can find potential drivers of Diabetes_binary include:\
+- **BMI**:Individuals with diabetes have higher BMI compared to those without diabetes.\
+- **GenHlth**: General health is rated worse among individuals with diabetes.\
+- **MentHlth**: Mental health is slightly poorer among individuals with diabetes.\
+- **PhysHlth**: Physical health is poorer among individuals with diabetes.\
+
+Lastly, let's see the correlation plot for all variables:
+
+```{r}
+# Convert categorical variables to numerical codes
+data_numeric <- data |>
+  mutate_if(is.factor, as.numeric)
+
+# Compute the correlation matrix
+correlation_matrix <- cor(data_numeric, use = "complete.obs")
+
+# Generate the correlation plot
+corrplot(correlation_matrix, method = "color", 
+         tl.cex = 0.8,
+         col = colorRampPalette(c("red", "white", "blue"))(200),
+         type = "upper", 
+         diag = FALSE)
+```
+
+Based on all the above plots, the potential drivers of Diabetes_binary include:\
+- **High Blood Pressure (HighBP)**\
+- **High Cholesterol (HighChol)**\
+- **Body Mass Index (BMI)**\
+- **Stroke**\
+- **Heart Disease or Attack (HeartDiseaseorAttack)**\
+- **Physical Activity (PhysActivity)**\
+- **Fruits Consumption (Fruits)**\
+- **Vegetables Consumption (Veggies)**\
+- **Heavy Alcohol Consumption (HvyAlcoholConsump)**\
+- **General Health (GenHlth)**\
+- **Mental Health (MentHlth)**\
+- **Physical Health (PhysHlth)**\
+- **Difficulty Walking (DiffWalk)**\
+- **Age**\
+- **Education**\
+- **Income**
 
 [Click here for the Modeling Page](Modeling.html)

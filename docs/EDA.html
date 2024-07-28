@@ -135,16 +135,64 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 
 <section id="introduction" class="level2">
 <h2 class="anchored" data-anchor-id="introduction">Introduction</h2>
-<p>You should have an introduction section that • briefly describes the data and the variables you have to work with (just discuss the ones you’ll investigate use in your analysis). • describes the purpose of your EDA and ultimate goal of modeling.</p>
-<p>For this project, we will analyze a Diabetes Health Indicators Dataset: https://www.kaggle.com/datasets/alexteboul/diabetes-health-indicators-dataset. Specifically, the diabetes_binary_health_indicators_BRFSS2015.csv data.</p>
+<p>In this study, we utilize the diabetes_binary_health_indicators_BRFSS2015.csv data (from https://www.kaggle.com/datasets/alexteboul/diabetes-health-indicators-dataset) to investigate the relationships between diabetes status and a range of health-related variables.</p>
+<p>The dataset comprises 218,334 individuals without diabetes and 35,346 individuals with diabetes, encompassing various demographic, behavioral, and health status indicators. The response variable is Diabetes_binary, which represent whether a person has diabetes or not. The data has other 21 variables as potential predictors. For example, whether an individual has high blood pressure (<strong>HighBP</strong>), whether an individual has high cholesterol (<strong>HighChol</strong>), whether an individual has ever had their cholesterol checked (<strong>CholCheck</strong>), Body Mass Index (<strong>BMI</strong>), whether an individual is a current smoker (<strong>Smoker</strong>), whether an individual has ever had a stroke (<strong>Stroke</strong>), whether an individual has ever had heart disease or a heart attack (<strong>HeartDiseaseorAttack</strong>), whether an individual has engaged in physical activity in the past month (<strong>PhysActivity</strong>), whether an individual consumes fruits daily (<strong>Fruits</strong>), whether an individual consumes vegetables daily (<strong>Veggies</strong>), whether an individual engages in heavy alcohol consumption (<strong>HvyAlcoholConsump</strong>), whether an individual has access to healthcare coverage (<strong>AnyHealthcare</strong>), whether cost has prevented an individual from visiting a doctor in the past year (<strong>NoDocbcCost</strong>), general health (<strong>GenHlth</strong>), mental health (<strong>MentHlth</strong>), physical health (<strong>PhysHlth</strong>), whether an individual has difficulty walking or climbing stairs (<strong>DiffWalk</strong>), <strong>age</strong>, <strong>sex</strong>, <strong>income</strong>, and <strong>education</strong> level.</p>
+<p>The primary purpose of the exploratory data analysis is to uncover patterns, relationships, and potential factors associated with diabetes. By examining the distribution of these variables and their relationships with diabetes status, we aim to identify key indicators that might contribute to the presence of diabetes. The ultimate goal of our modeling efforts is to develop a predictive model that can accurately classify individuals as having diabetes or not based on their health and demographic profiles. This model can be valuable for early detection and prevention strategies, allowing healthcare providers to identify at-risk individuals and implement targeted interventions to manage or mitigate the risk of diabetes.</p>
+</section>
+<section id="load-necessary-packages" class="level2">
+<h2 class="anchored" data-anchor-id="load-necessary-packages">load necessary packages</h2>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(tidyverse)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Warning: package 'ggplot2' was built under R version 4.2.3</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Warning: package 'tidyr' was built under R version 4.2.3</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Warning: package 'readr' was built under R version 4.2.3</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Warning: package 'dplyr' was built under R version 4.2.3</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>── Attaching core tidyverse packages ──────────────────────── tidyverse 2.0.0 ──
+✔ dplyr     1.1.4     ✔ readr     2.1.5
+✔ forcats   1.0.0     ✔ stringr   1.5.0
+✔ ggplot2   3.5.1     ✔ tibble    3.2.1
+✔ lubridate 1.9.3     ✔ tidyr     1.3.1
+✔ purrr     1.0.1     
+── Conflicts ────────────────────────────────────────── tidyverse_conflicts() ──
+✖ dplyr::filter() masks stats::filter()
+✖ dplyr::lag()    masks stats::lag()
+ℹ Use the conflicted package (&lt;http://conflicted.r-lib.org/&gt;) to force all conflicts to become errors</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(caret)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Loading required package: lattice
+
+Attaching package: 'caret'
+
+The following object is masked from 'package:purrr':
+
+    lift</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb9"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(corrplot)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>corrplot 0.92 loaded</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb11"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(dplyr)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
 </section>
 <section id="data" class="level2">
 <h2 class="anchored" data-anchor-id="data">Data</h2>
-<p>Use a relative path to import the data. You likely want to convert a lot of the variables to factors with meaningful level names. Check on missingness, etc.</p>
-<p>Read data and correct the data type for each variable:</p>
+<p>read in data and check data structure.</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>data <span class="ot">&lt;-</span> <span class="fu">read.csv</span>(<span class="st">"diabetes_binary_health_indicators_BRFSS2015.csv"</span>) <span class="co"># read data</span></span>
-<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="fu">str</span>(data) <span class="co"># view data structure</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb12"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="co"># read data with relative path</span></span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a>data <span class="ot">&lt;-</span> <span class="fu">read.csv</span>(<span class="st">"./diabetes_binary_health_indicators_BRFSS2015.csv"</span>) </span>
+<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a><span class="co"># view data structure</span></span>
+<span id="cb12-5"><a href="#cb12-5" aria-hidden="true" tabindex="-1"></a><span class="fu">str</span>(data)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>'data.frame':   253680 obs. of  22 variables:
  $ Diabetes_binary     : num  0 0 0 0 0 0 0 0 1 0 ...
@@ -170,46 +218,393 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
  $ Education           : num  4 6 4 3 5 6 6 4 5 4 ...
  $ Income              : num  3 1 8 6 4 8 7 4 1 3 ...</code></pre>
 </div>
-<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="co"># select variables that should be character type</span></span>
-<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>No_character<span class="ot">&lt;-</span><span class="fu">c</span>(<span class="dv">1</span><span class="sc">:</span><span class="dv">4</span>, <span class="dv">6</span><span class="sc">:</span><span class="dv">14</span>,<span class="dv">18</span>,<span class="dv">19</span>) </span>
-<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a><span class="co"># correct the data type</span></span>
-<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>data [,No_character] <span class="ot">&lt;-</span> <span class="fu">lapply</span>(data[,No_character], as.character) </span>
-<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a><span class="fu">str</span>(data) <span class="co"># check data structure</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb14"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="co"># check missingness</span></span>
+<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a><span class="fu">colSums</span>(<span class="fu">is.na</span>(data))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>     Diabetes_binary               HighBP             HighChol 
+                   0                    0                    0 
+           CholCheck                  BMI               Smoker 
+                   0                    0                    0 
+              Stroke HeartDiseaseorAttack         PhysActivity 
+                   0                    0                    0 
+              Fruits              Veggies    HvyAlcoholConsump 
+                   0                    0                    0 
+       AnyHealthcare          NoDocbcCost              GenHlth 
+                   0                    0                    0 
+            MentHlth             PhysHlth             DiffWalk 
+                   0                    0                    0 
+                 Sex                  Age            Education 
+                   0                    0                    0 
+              Income 
+                   0 </code></pre>
+</div>
+</div>
+<p>The data has been read successfully and no missing values were observed. However, many variables are coded numerically but they should be categorical data. Let’s convert those variables to factors with meaningful level names.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb16"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a><span class="co"># select variables that should be converted to 0/1 coded factors</span></span>
+<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a>No_factor<span class="ot">&lt;-</span><span class="fu">c</span>(<span class="dv">1</span><span class="sc">:</span><span class="dv">4</span>, <span class="dv">6</span><span class="sc">:</span><span class="dv">14</span>, <span class="dv">18</span>) </span>
+<span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-4"><a href="#cb16-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Define the levels and labels</span></span>
+<span id="cb16-5"><a href="#cb16-5" aria-hidden="true" tabindex="-1"></a>levels_0_1 <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="dv">0</span>, <span class="dv">1</span>)</span>
+<span id="cb16-6"><a href="#cb16-6" aria-hidden="true" tabindex="-1"></a>labels_no_yes <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">"no"</span>, <span class="st">"yes"</span>)</span>
+<span id="cb16-7"><a href="#cb16-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-8"><a href="#cb16-8" aria-hidden="true" tabindex="-1"></a><span class="co"># Convert the selected variables to factors with levels 0 and 1 and labels No and Yes</span></span>
+<span id="cb16-9"><a href="#cb16-9" aria-hidden="true" tabindex="-1"></a>data[, No_factor] <span class="ot">&lt;-</span> <span class="fu">lapply</span>(data[, No_factor], <span class="cf">function</span>(x) {</span>
+<span id="cb16-10"><a href="#cb16-10" aria-hidden="true" tabindex="-1"></a>  <span class="fu">factor</span>(x, <span class="at">levels =</span> levels_0_1, <span class="at">labels =</span> labels_no_yes)</span>
+<span id="cb16-11"><a href="#cb16-11" aria-hidden="true" tabindex="-1"></a>})</span>
+<span id="cb16-12"><a href="#cb16-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-13"><a href="#cb16-13" aria-hidden="true" tabindex="-1"></a><span class="co"># Convert demographic variables to factors with labels</span></span>
+<span id="cb16-14"><a href="#cb16-14" aria-hidden="true" tabindex="-1"></a>data <span class="ot">&lt;-</span> data <span class="sc">|&gt;</span></span>
+<span id="cb16-15"><a href="#cb16-15" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span> (<span class="at">Sex=</span><span class="fu">factor</span>(Sex, <span class="at">levels=</span><span class="fu">c</span>(<span class="dv">0</span>,<span class="dv">1</span>), <span class="at">labels=</span><span class="fu">c</span>(<span class="st">"female"</span>,<span class="st">"male"</span>)),</span>
+<span id="cb16-16"><a href="#cb16-16" aria-hidden="true" tabindex="-1"></a>          <span class="at">Age=</span><span class="fu">factor</span>(Age, <span class="at">levels=</span><span class="fu">c</span>(<span class="dv">1</span><span class="sc">:</span><span class="dv">13</span>), <span class="at">labels=</span><span class="fu">c</span>(<span class="st">"18-24"</span>,<span class="st">"25-29"</span>,<span class="st">"30-34"</span>,</span>
+<span id="cb16-17"><a href="#cb16-17" aria-hidden="true" tabindex="-1"></a>                                                   <span class="st">"35-39"</span>,<span class="st">"40-44"</span>,<span class="st">"45-49"</span>,</span>
+<span id="cb16-18"><a href="#cb16-18" aria-hidden="true" tabindex="-1"></a>                                                   <span class="st">"50-54"</span>,<span class="st">"55-59"</span>,<span class="st">"60-64"</span>,</span>
+<span id="cb16-19"><a href="#cb16-19" aria-hidden="true" tabindex="-1"></a>                                                   <span class="st">"65-69"</span>,<span class="st">"70-74"</span>,<span class="st">"75-79"</span>,</span>
+<span id="cb16-20"><a href="#cb16-20" aria-hidden="true" tabindex="-1"></a>                                                   <span class="st">"80 or older"</span>)),</span>
+<span id="cb16-21"><a href="#cb16-21" aria-hidden="true" tabindex="-1"></a>          <span class="at">Education=</span><span class="fu">factor</span>(Education, <span class="at">levels=</span><span class="fu">c</span>(<span class="dv">1</span><span class="sc">:</span><span class="dv">6</span>), </span>
+<span id="cb16-22"><a href="#cb16-22" aria-hidden="true" tabindex="-1"></a>                           <span class="at">labels=</span><span class="fu">c</span>(<span class="st">"Never attended school or only kindergarten"</span>,</span>
+<span id="cb16-23"><a href="#cb16-23" aria-hidden="true" tabindex="-1"></a>                           <span class="st">"Elementary"</span>, <span class="st">"Some high school"</span>, <span class="st">"High school graduate"</span>,</span>
+<span id="cb16-24"><a href="#cb16-24" aria-hidden="true" tabindex="-1"></a>                           <span class="st">"Some college or technical school"</span>, <span class="st">"College graduate"</span>)),</span>
+<span id="cb16-25"><a href="#cb16-25" aria-hidden="true" tabindex="-1"></a>          <span class="at">Income=</span><span class="fu">factor</span>(Income, <span class="at">levels=</span><span class="fu">c</span>(<span class="dv">1</span><span class="sc">:</span><span class="dv">8</span>), <span class="at">labels=</span><span class="fu">c</span>(<span class="st">"less than $10,000"</span>,</span>
+<span id="cb16-26"><a href="#cb16-26" aria-hidden="true" tabindex="-1"></a>                                                        <span class="st">"$10,000 to less than $15,000"</span>,</span>
+<span id="cb16-27"><a href="#cb16-27" aria-hidden="true" tabindex="-1"></a>                                                        <span class="st">"$15,000 to less than $20,000"</span>,</span>
+<span id="cb16-28"><a href="#cb16-28" aria-hidden="true" tabindex="-1"></a>                                                        <span class="st">"$20,000 to less than $25,000"</span>,</span>
+<span id="cb16-29"><a href="#cb16-29" aria-hidden="true" tabindex="-1"></a>                                                        <span class="st">"$25,000 to less than $35,000"</span>,</span>
+<span id="cb16-30"><a href="#cb16-30" aria-hidden="true" tabindex="-1"></a>                                                        <span class="st">"$35,000 to less than $50,000"</span>,</span>
+<span id="cb16-31"><a href="#cb16-31" aria-hidden="true" tabindex="-1"></a>                                                        <span class="st">"$50,000 to less than $75,000"</span>,</span>
+<span id="cb16-32"><a href="#cb16-32" aria-hidden="true" tabindex="-1"></a>                                                        <span class="st">"$75,000 or more"</span>)))</span>
+<span id="cb16-33"><a href="#cb16-33" aria-hidden="true" tabindex="-1"></a><span class="fu">str</span>(data) <span class="co"># check data structure</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>'data.frame':   253680 obs. of  22 variables:
- $ Diabetes_binary     : chr  "0" "0" "0" "0" ...
- $ HighBP              : chr  "1" "0" "1" "1" ...
- $ HighChol            : chr  "1" "0" "1" "0" ...
- $ CholCheck           : chr  "1" "0" "1" "1" ...
+ $ Diabetes_binary     : Factor w/ 2 levels "no","yes": 1 1 1 1 1 1 1 1 2 1 ...
+ $ HighBP              : Factor w/ 2 levels "no","yes": 2 1 2 2 2 2 2 2 2 1 ...
+ $ HighChol            : Factor w/ 2 levels "no","yes": 2 1 2 1 2 2 1 2 2 1 ...
+ $ CholCheck           : Factor w/ 2 levels "no","yes": 2 1 2 2 2 2 2 2 2 2 ...
  $ BMI                 : num  40 25 28 27 24 25 30 25 30 24 ...
- $ Smoker              : chr  "1" "1" "0" "0" ...
- $ Stroke              : chr  "0" "0" "0" "0" ...
- $ HeartDiseaseorAttack: chr  "0" "0" "0" "0" ...
- $ PhysActivity        : chr  "0" "1" "0" "1" ...
- $ Fruits              : chr  "0" "0" "1" "1" ...
- $ Veggies             : chr  "1" "0" "0" "1" ...
- $ HvyAlcoholConsump   : chr  "0" "0" "0" "0" ...
- $ AnyHealthcare       : chr  "1" "0" "1" "1" ...
- $ NoDocbcCost         : chr  "0" "1" "1" "0" ...
+ $ Smoker              : Factor w/ 2 levels "no","yes": 2 2 1 1 1 2 2 2 2 1 ...
+ $ Stroke              : Factor w/ 2 levels "no","yes": 1 1 1 1 1 1 1 1 1 1 ...
+ $ HeartDiseaseorAttack: Factor w/ 2 levels "no","yes": 1 1 1 1 1 1 1 1 2 1 ...
+ $ PhysActivity        : Factor w/ 2 levels "no","yes": 1 2 1 2 2 2 1 2 1 1 ...
+ $ Fruits              : Factor w/ 2 levels "no","yes": 1 1 2 2 2 2 1 1 2 1 ...
+ $ Veggies             : Factor w/ 2 levels "no","yes": 2 1 1 2 2 2 1 2 2 2 ...
+ $ HvyAlcoholConsump   : Factor w/ 2 levels "no","yes": 1 1 1 1 1 1 1 1 1 1 ...
+ $ AnyHealthcare       : Factor w/ 2 levels "no","yes": 2 1 2 2 2 2 2 2 2 2 ...
+ $ NoDocbcCost         : Factor w/ 2 levels "no","yes": 1 2 2 1 1 1 1 1 1 1 ...
  $ GenHlth             : num  5 3 5 2 2 2 3 3 5 2 ...
  $ MentHlth            : num  18 0 30 0 3 0 0 0 30 0 ...
  $ PhysHlth            : num  15 0 30 0 0 2 14 0 30 0 ...
- $ DiffWalk            : chr  "1" "0" "1" "0" ...
- $ Sex                 : chr  "0" "0" "0" "0" ...
- $ Age                 : num  9 7 9 11 11 10 9 11 9 8 ...
- $ Education           : num  4 6 4 3 5 6 6 4 5 4 ...
- $ Income              : num  3 1 8 6 4 8 7 4 1 3 ...</code></pre>
+ $ DiffWalk            : Factor w/ 2 levels "no","yes": 2 1 2 1 1 1 1 2 2 1 ...
+ $ Sex                 : Factor w/ 2 levels "female","male": 1 1 1 1 1 2 1 1 1 2 ...
+ $ Age                 : Factor w/ 13 levels "18-24","25-29",..: 9 7 9 11 11 10 9 11 9 8 ...
+ $ Education           : Factor w/ 6 levels "Never attended school or only kindergarten",..: 4 6 4 3 5 6 6 4 5 4 ...
+ $ Income              : Factor w/ 8 levels "less than $10,000",..: 3 1 8 6 4 8 7 4 1 3 ...</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb18"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(data) <span class="co"># summarize data</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code> Diabetes_binary HighBP       HighChol     CholCheck         BMI       
+ no :218334      no :144851   no :146089   no :  9470   Min.   :12.00  
+ yes: 35346      yes:108829   yes:107591   yes:244210   1st Qu.:24.00  
+                                                        Median :27.00  
+                                                        Mean   :28.38  
+                                                        3rd Qu.:31.00  
+                                                        Max.   :98.00  
+                                                                       
+ Smoker       Stroke       HeartDiseaseorAttack PhysActivity Fruits      
+ no :141257   no :243388   no :229787           no : 61760   no : 92782  
+ yes:112423   yes: 10292   yes: 23893           yes:191920   yes:160898  
+                                                                         
+                                                                         
+                                                                         
+                                                                         
+                                                                         
+ Veggies      HvyAlcoholConsump AnyHealthcare NoDocbcCost     GenHlth     
+ no : 47839   no :239424        no : 12417    no :232326   Min.   :1.000  
+ yes:205841   yes: 14256        yes:241263    yes: 21354   1st Qu.:2.000  
+                                                           Median :2.000  
+                                                           Mean   :2.511  
+                                                           3rd Qu.:3.000  
+                                                           Max.   :5.000  
+                                                                          
+    MentHlth         PhysHlth      DiffWalk         Sex              Age       
+ Min.   : 0.000   Min.   : 0.000   no :211005   female:141974   60-64  :33244  
+ 1st Qu.: 0.000   1st Qu.: 0.000   yes: 42675   male  :111706   65-69  :32194  
+ Median : 0.000   Median : 0.000                                55-59  :30832  
+ Mean   : 3.185   Mean   : 4.242                                50-54  :26314  
+ 3rd Qu.: 2.000   3rd Qu.: 3.000                                70-74  :23533  
+ Max.   :30.000   Max.   :30.000                                45-49  :19819  
+                                                                (Other):87744  
+                                      Education     
+ Never attended school or only kindergarten:   174  
+ Elementary                                :  4043  
+ Some high school                          :  9478  
+ High school graduate                      : 62750  
+ Some college or technical school          : 69910  
+ College graduate                          :107325  
+                                                    
+                          Income     
+ $75,000 or more             :90385  
+ $50,000 to less than $75,000:43219  
+ $35,000 to less than $50,000:36470  
+ $25,000 to less than $35,000:25883  
+ $20,000 to less than $25,000:20135  
+ $15,000 to less than $20,000:15994  
+ (Other)                     :21594  </code></pre>
 </div>
 </div>
 </section>
-<section id="summarizations" class="level2">
-<h2 class="anchored" data-anchor-id="summarizations">Summarizations</h2>
-<p>You should then produce meaningful summary statistics and plots about the data you are working with (especially as it relates to your response). Although a best practice would be to split the data at hand into a training and testing set first, go ahead and do your EDA on the full data. Be sure to have a narrative about what you are exploring and what the summaries and graphs you created say about the relationships in your data.</p>
+<section id="eda-summarizations" class="level2">
+<h2 class="anchored" data-anchor-id="eda-summarizations">EDA &amp; Summarizations</h2>
+<p>Summarize data and do some exploratory data analysis. First, let’s focus on categorical variables:</p>
 <div class="cell">
-<div class="cell-output cell-output-stdout">
-<pre><code>[1] 4</code></pre>
+<div class="sourceCode cell-code" id="cb20"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Plotting function for categorical variables</span></span>
+<span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a>plot_categorical <span class="ot">&lt;-</span> <span class="cf">function</span>(var) {</span>
+<span id="cb20-3"><a href="#cb20-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ggplot</span>(data, <span class="fu">aes_string</span>(<span class="at">x =</span> var, <span class="at">fill =</span> <span class="st">"Diabetes_binary"</span>)) <span class="sc">+</span></span>
+<span id="cb20-4"><a href="#cb20-4" aria-hidden="true" tabindex="-1"></a>    <span class="fu">geom_bar</span>(<span class="at">position =</span> <span class="st">"dodge"</span>) <span class="sc">+</span></span>
+<span id="cb20-5"><a href="#cb20-5" aria-hidden="true" tabindex="-1"></a>    <span class="fu">labs</span>(<span class="at">title =</span> <span class="fu">paste</span>(<span class="st">"Distribution of"</span>, var, <span class="st">"by Diabetes_binary"</span>), <span class="at">x =</span> var, <span class="at">y =</span> <span class="st">"Count"</span>) <span class="sc">+</span></span>
+<span id="cb20-6"><a href="#cb20-6" aria-hidden="true" tabindex="-1"></a>    <span class="fu">theme_minimal</span>()</span>
+<span id="cb20-7"><a href="#cb20-7" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb20-8"><a href="#cb20-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb20-9"><a href="#cb20-9" aria-hidden="true" tabindex="-1"></a><span class="co"># List of categorical variables</span></span>
+<span id="cb20-10"><a href="#cb20-10" aria-hidden="true" tabindex="-1"></a>categorical_vars <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">"HighBP"</span>, <span class="st">"HighChol"</span>, <span class="st">"CholCheck"</span>, <span class="st">"Smoker"</span>, <span class="st">"Stroke"</span>,</span>
+<span id="cb20-11"><a href="#cb20-11" aria-hidden="true" tabindex="-1"></a>                      <span class="st">"HeartDiseaseorAttack"</span>, <span class="st">"PhysActivity"</span>, <span class="st">"Fruits"</span>, </span>
+<span id="cb20-12"><a href="#cb20-12" aria-hidden="true" tabindex="-1"></a>                      <span class="st">"Veggies"</span>, <span class="st">"HvyAlcoholConsump"</span>, <span class="st">"AnyHealthcare"</span>,</span>
+<span id="cb20-13"><a href="#cb20-13" aria-hidden="true" tabindex="-1"></a>                      <span class="st">"NoDocbcCost"</span>, <span class="st">"DiffWalk"</span>, <span class="st">"Age"</span>, <span class="st">"Sex"</span>, <span class="st">"Education"</span>, <span class="st">"Income"</span>)</span>
+<span id="cb20-14"><a href="#cb20-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb20-15"><a href="#cb20-15" aria-hidden="true" tabindex="-1"></a><span class="co"># Plot each categorical variable</span></span>
+<span id="cb20-16"><a href="#cb20-16" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> (var <span class="cf">in</span> categorical_vars) {</span>
+<span id="cb20-17"><a href="#cb20-17" aria-hidden="true" tabindex="-1"></a>  <span class="fu">print</span>(<span class="fu">plot_categorical</span>(var))</span>
+<span id="cb20-18"><a href="#cb20-18" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Warning: `aes_string()` was deprecated in ggplot2 3.0.0.
+ℹ Please use tidy evaluation idioms with `aes()`.
+ℹ See also `vignette("ggplot2-in-packages")` for more information.</code></pre>
+</div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="EDA_files/figure-html/unnamed-chunk-4-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
 </div>
 </div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="EDA_files/figure-html/unnamed-chunk-4-2.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="EDA_files/figure-html/unnamed-chunk-4-3.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="EDA_files/figure-html/unnamed-chunk-4-4.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="EDA_files/figure-html/unnamed-chunk-4-5.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="EDA_files/figure-html/unnamed-chunk-4-6.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="EDA_files/figure-html/unnamed-chunk-4-7.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="EDA_files/figure-html/unnamed-chunk-4-8.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="EDA_files/figure-html/unnamed-chunk-4-9.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="EDA_files/figure-html/unnamed-chunk-4-10.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="EDA_files/figure-html/unnamed-chunk-4-11.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="EDA_files/figure-html/unnamed-chunk-4-12.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="EDA_files/figure-html/unnamed-chunk-4-13.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="EDA_files/figure-html/unnamed-chunk-4-14.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="EDA_files/figure-html/unnamed-chunk-4-15.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="EDA_files/figure-html/unnamed-chunk-4-16.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="EDA_files/figure-html/unnamed-chunk-4-17.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>Based on the above plots, we can find potential drivers of Diabetes_binary include:<br>
+- <strong>HighBP</strong>:A higher proportion of individuals with diabetes have high blood pressure compared to those without diabetes.<br>
+- <strong>HighChol</strong>: High cholesterol is more prevalent among those with diabetes.<br>
+- <strong>CholCheck</strong>: Most individuals, both with and without diabetes, have had their cholesterol checked, but it is slightly higher among those with diabetes.<br>
+- <strong>Stroke</strong>: Stroke is more common in individuals with diabetes compared to those without.<br>
+- <strong>HeartDiseaseorAttack</strong>: Heart disease or attack is more common among individuals with diabetes.<br>
+- <strong>PhysActivity</strong>: Physical activity is less common among individuals with diabetes.<br>
+- <strong>Fruits</strong>: Lower consumption of fruits is associated with diabetes.<br>
+- <strong>Veggies</strong>: Lower consumption of vegetables is associated with diabetes.<br>
+- <strong>HvyAlcoholConsump</strong>: Heavy alcohol consumption is less common among individuals with diabetes.<br>
+- <strong>DiffWalk</strong>: Difficulty walking is more common among individuals with diabetes.<br>
+- <strong>Age</strong>: More elder people have diabetes than younger people.<br>
+- <strong>Education</strong>: Among those with high education level, less portion of people got diabete.<br>
+- <strong>Income</strong>: Diabetes is more common among individuals with low income.</p>
+<p>Then, let’s plot the numeric variables:</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb22"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Plotting function for continuous variables</span></span>
+<span id="cb22-2"><a href="#cb22-2" aria-hidden="true" tabindex="-1"></a>plot_continuous <span class="ot">&lt;-</span> <span class="cf">function</span>(var) {</span>
+<span id="cb22-3"><a href="#cb22-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ggplot</span>(data, <span class="fu">aes_string</span>(<span class="at">x =</span> <span class="st">"Diabetes_binary"</span>, <span class="at">y =</span> var, <span class="at">fill =</span> <span class="st">"Diabetes_binary"</span>)) <span class="sc">+</span></span>
+<span id="cb22-4"><a href="#cb22-4" aria-hidden="true" tabindex="-1"></a>    <span class="fu">geom_boxplot</span>() <span class="sc">+</span></span>
+<span id="cb22-5"><a href="#cb22-5" aria-hidden="true" tabindex="-1"></a>    <span class="fu">labs</span>(<span class="at">title =</span> <span class="fu">paste</span>(<span class="st">"Boxplot of"</span>, var, <span class="st">"by Diabetes_binary"</span>), <span class="at">x =</span> <span class="st">"Diabetes_binary"</span>, <span class="at">y =</span> var) <span class="sc">+</span></span>
+<span id="cb22-6"><a href="#cb22-6" aria-hidden="true" tabindex="-1"></a>    <span class="fu">theme_minimal</span>()</span>
+<span id="cb22-7"><a href="#cb22-7" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb22-8"><a href="#cb22-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb22-9"><a href="#cb22-9" aria-hidden="true" tabindex="-1"></a><span class="co"># List of continuous variables</span></span>
+<span id="cb22-10"><a href="#cb22-10" aria-hidden="true" tabindex="-1"></a>continuous_vars <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">"BMI"</span>, <span class="st">"GenHlth"</span>, <span class="st">"MentHlth"</span>, <span class="st">"PhysHlth"</span>)</span>
+<span id="cb22-11"><a href="#cb22-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb22-12"><a href="#cb22-12" aria-hidden="true" tabindex="-1"></a><span class="co"># Plot each continuous variable</span></span>
+<span id="cb22-13"><a href="#cb22-13" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> (var <span class="cf">in</span> continuous_vars) {</span>
+<span id="cb22-14"><a href="#cb22-14" aria-hidden="true" tabindex="-1"></a>  <span class="fu">print</span>(<span class="fu">plot_continuous</span>(var))</span>
+<span id="cb22-15"><a href="#cb22-15" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="EDA_files/figure-html/unnamed-chunk-5-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="EDA_files/figure-html/unnamed-chunk-5-2.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="EDA_files/figure-html/unnamed-chunk-5-3.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="EDA_files/figure-html/unnamed-chunk-5-4.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>Based on the above plots, we can find potential drivers of Diabetes_binary include:<br>
+- <strong>BMI</strong>:Individuals with diabetes have higher BMI compared to those without diabetes.<br>
+- <strong>GenHlth</strong>: General health is rated worse among individuals with diabetes.<br>
+- <strong>MentHlth</strong>: Mental health is slightly poorer among individuals with diabetes.<br>
+- <strong>PhysHlth</strong>: Physical health is poorer among individuals with diabetes.<br>
+</p>
+<p>Lastly, let’s see the correlation plot for all variables:</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb23"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Convert categorical variables to numerical codes</span></span>
+<span id="cb23-2"><a href="#cb23-2" aria-hidden="true" tabindex="-1"></a>data_numeric <span class="ot">&lt;-</span> data <span class="sc">|&gt;</span></span>
+<span id="cb23-3"><a href="#cb23-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate_if</span>(is.factor, as.numeric)</span>
+<span id="cb23-4"><a href="#cb23-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-5"><a href="#cb23-5" aria-hidden="true" tabindex="-1"></a><span class="co"># Compute the correlation matrix</span></span>
+<span id="cb23-6"><a href="#cb23-6" aria-hidden="true" tabindex="-1"></a>correlation_matrix <span class="ot">&lt;-</span> <span class="fu">cor</span>(data_numeric, <span class="at">use =</span> <span class="st">"complete.obs"</span>)</span>
+<span id="cb23-7"><a href="#cb23-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-8"><a href="#cb23-8" aria-hidden="true" tabindex="-1"></a><span class="co"># Generate the correlation plot</span></span>
+<span id="cb23-9"><a href="#cb23-9" aria-hidden="true" tabindex="-1"></a><span class="fu">corrplot</span>(correlation_matrix, <span class="at">method =</span> <span class="st">"color"</span>, </span>
+<span id="cb23-10"><a href="#cb23-10" aria-hidden="true" tabindex="-1"></a>         <span class="at">tl.cex =</span> <span class="fl">0.8</span>,</span>
+<span id="cb23-11"><a href="#cb23-11" aria-hidden="true" tabindex="-1"></a>         <span class="at">col =</span> <span class="fu">colorRampPalette</span>(<span class="fu">c</span>(<span class="st">"red"</span>, <span class="st">"white"</span>, <span class="st">"blue"</span>))(<span class="dv">200</span>),</span>
+<span id="cb23-12"><a href="#cb23-12" aria-hidden="true" tabindex="-1"></a>         <span class="at">type =</span> <span class="st">"upper"</span>, </span>
+<span id="cb23-13"><a href="#cb23-13" aria-hidden="true" tabindex="-1"></a>         <span class="at">diag =</span> <span class="cn">FALSE</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="EDA_files/figure-html/unnamed-chunk-6-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>Based on all the above plots, the potential drivers of Diabetes_binary include:<br>
+- <strong>High Blood Pressure (HighBP)</strong><br>
+- <strong>High Cholesterol (HighChol)</strong><br>
+- <strong>Body Mass Index (BMI)</strong><br>
+- <strong>Stroke</strong><br>
+- <strong>Heart Disease or Attack (HeartDiseaseorAttack)</strong><br>
+- <strong>Physical Activity (PhysActivity)</strong><br>
+- <strong>Fruits Consumption (Fruits)</strong><br>
+- <strong>Vegetables Consumption (Veggies)</strong><br>
+- <strong>Heavy Alcohol Consumption (HvyAlcoholConsump)</strong><br>
+- <strong>General Health (GenHlth)</strong><br>
+- <strong>Mental Health (MentHlth)</strong><br>
+- <strong>Physical Health (PhysHlth)</strong><br>
+- <strong>Difficulty Walking (DiffWalk)</strong><br>
+- <strong>Age</strong><br>
+- <strong>Education</strong><br>
+- <strong>Income</strong></p>
 <p><a href="Modeling.html">Click here for the Modeling Page</a></p>
 
 
