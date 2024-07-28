@@ -1,0 +1,44 @@
+[
+  {
+    "objectID": "EDA.html",
+    "href": "EDA.html",
+    "title": "EDA",
+    "section": "",
+    "text": "For this project, we will analyze a Diabetes Health Indicators Dataset: https://www.kaggle.com/datasets/alexteboul/diabetes-health-indicators-dataset. Specifically, the diabetes_binary_health_indicators_BRFSS2015.csv data."
+  },
+  {
+    "objectID": "EDA.html#st558-final-project---wenna-han",
+    "href": "EDA.html#st558-final-project---wenna-han",
+    "title": "EDA",
+    "section": "",
+    "text": "For this project, we will analyze a Diabetes Health Indicators Dataset: https://www.kaggle.com/datasets/alexteboul/diabetes-health-indicators-dataset. Specifically, the diabetes_binary_health_indicators_BRFSS2015.csv data."
+  },
+  {
+    "objectID": "EDA.html#read-in-data",
+    "href": "EDA.html#read-in-data",
+    "title": "EDA",
+    "section": "Read In data",
+    "text": "Read In data\nYou should read about the data and especially about each variable. Many are coded numerically but most are not numeric variables.\n\ndata &lt;- read.csv(\"diabetes_binary_health_indicators_BRFSS2015.csv\")\nhead(data)\n\n  Diabetes_binary HighBP HighChol CholCheck BMI Smoker Stroke\n1               0      1        1         1  40      1      0\n2               0      0        0         0  25      1      0\n3               0      1        1         1  28      0      0\n4               0      1        0         1  27      0      0\n5               0      1        1         1  24      0      0\n6               0      1        1         1  25      1      0\n  HeartDiseaseorAttack PhysActivity Fruits Veggies HvyAlcoholConsump\n1                    0            0      0       1                 0\n2                    0            1      0       0                 0\n3                    0            0      1       0                 0\n4                    0            1      1       1                 0\n5                    0            1      1       1                 0\n6                    0            1      1       1                 0\n  AnyHealthcare NoDocbcCost GenHlth MentHlth PhysHlth DiffWalk Sex Age\n1             1           0       5       18       15        1   0   9\n2             0           1       3        0        0        0   0   7\n3             1           1       5       30       30        1   0   9\n4             1           0       2        0        0        0   0  11\n5             1           0       2        3        0        0   0  11\n6             1           0       2        0        2        0   1  10\n  Education Income\n1         4      3\n2         6      1\n3         4      8\n4         3      6\n5         5      4\n6         6      8\n\n\nYou can add options to executable code like this\n\n\n[1] 4\n\n\nClick here for the Modeling Page"
+  },
+  {
+    "objectID": "Modeling.html",
+    "href": "Modeling.html",
+    "title": "Modeling",
+    "section": "",
+    "text": "Quarto enables you to weave together content and executable code into a finished document. To learn more about Quarto see https://quarto.org."
+  },
+  {
+    "objectID": "Modeling.html#quarto",
+    "href": "Modeling.html#quarto",
+    "title": "Modeling",
+    "section": "",
+    "text": "Quarto enables you to weave together content and executable code into a finished document. To learn more about Quarto see https://quarto.org."
+  },
+  {
+    "objectID": "Modeling.html#running-code",
+    "href": "Modeling.html#running-code",
+    "title": "Modeling",
+    "section": "Running Code",
+    "text": "Running Code\nWhen you click the Render button a document will be generated that includes both content and the output of embedded code. You can embed code like this:\n\n1 + 1\n\n[1] 2\n\n\nYou can add options to executable code like this\n\n\n[1] 4\n\n\nThe echo: false option disables the printing of code (only output is displayed)."
+  }
+]

@@ -4,16 +4,15 @@ format: html
 editor: visual
 ---
 
-## Quarto
+## ST558 Final Project - Wenna Han
 
-Quarto enables you to weave together content and executable code into a finished document. To learn more about Quarto see <https://quarto.org>.
+For this project, we will analyze a Diabetes Health Indicators Dataset: https://www.kaggle.com/datasets/alexteboul/diabetes-health-indicators-dataset. Specifically, the diabetes_binary_health_indicators_BRFSS2015.csv data.
 
-## Running Code
-
-When you click the **Render** button a document will be generated that includes both content and the output of embedded code. You can embed code like this:
-
+## Read In data
+You should read about the data and especially about each variable. Many are coded numerically but most are not numeric variables.
 ```{r}
-1 + 1
+data <- read.csv("diabetes_binary_health_indicators_BRFSS2015.csv")
+head(data)
 ```
 
 You can add options to executable code like this
