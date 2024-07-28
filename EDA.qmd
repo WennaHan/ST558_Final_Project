@@ -1,21 +1,41 @@
 ---
-title: "EDA"
+title: "ST558 Final Project by Wenna Han - EDA"
 format: html
 editor: visual
 ---
 
-## ST558 Final Project - Wenna Han
+## Introduction
+You should have an introduction section that
+• briefly describes the data and the variables you have to work with (just discuss the ones you’ll investigate use in your analysis).
+• describes the purpose of your EDA and ultimate goal of modeling.
 
 For this project, we will analyze a Diabetes Health Indicators Dataset: https://www.kaggle.com/datasets/alexteboul/diabetes-health-indicators-dataset. Specifically, the diabetes_binary_health_indicators_BRFSS2015.csv data.
 
-## Read In data
-You should read about the data and especially about each variable. Many are coded numerically but most are not numeric variables.
+## Data
+
+Use a relative path to import the data. You likely want to convert a lot of the variables to factors with
+meaningful level names.
+Check on missingness, etc.
+
+Read data and correct the data type for each variable:
 ```{r}
-data <- read.csv("diabetes_binary_health_indicators_BRFSS2015.csv")
-head(data)
+data <- read.csv("diabetes_binary_health_indicators_BRFSS2015.csv") # read data
+str(data) # view data structure
+
+# select variables that should be character type
+No_character<-c(1:4, 6:14,18,19) 
+# correct the data type
+data [,No_character] <- lapply(data[,No_character], as.character) 
+str(data) # check data structure
 ```
 
-You can add options to executable code like this
+## Summarizations
+You should then produce meaningful summary statistics and plots about the data you are working with
+(especially as it relates to your response).
+Although a best practice would be to split the data at hand into a training and testing set first, go ahead
+and do your EDA on the full data.
+Be sure to have a narrative about what you are exploring and what the summaries and graphs
+you created say about the relationships in your data.
 
 ```{r}
 #| echo: false
