@@ -7,7 +7,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 
-<title>Modeling</title>
+<title>ST558 Final Project by Wenna Han - Modeling</title>
 <style>
 code{white-space: pre-wrap;}
 span.smallcaps{font-variant: small-caps;}
@@ -116,7 +116,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 
 <header id="title-block-header" class="quarto-title-block default">
 <div class="quarto-title">
-<h1 class="title">Modeling</h1>
+<h1 class="title">ST558 Final Project by Wenna Han - Modeling</h1>
 </div>
 
 
@@ -133,26 +133,789 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </header>
 
 
-<section id="quarto" class="level2">
-<h2 class="anchored" data-anchor-id="quarto">Quarto</h2>
-<p>Quarto enables you to weave together content and executable code into a finished document. To learn more about Quarto see <a href="https://quarto.org" class="uri">https://quarto.org</a>.</p>
+<section id="introduction" class="level2">
+<h2 class="anchored" data-anchor-id="introduction">Introduction</h2>
+<p>In this study, we utilize the diabetes_binary_health_indicators_BRFSS2015.csv data (from https://www.kaggle.com/datasets/alexteboul/diabetes-health-indicators-dataset) to investigate the relationships between diabetes status and a range of health-related variables.</p>
+<p>The dataset comprises 218,334 individuals without diabetes and 35,346 individuals with diabetes, encompassing various demographic, behavioral, and health status indicators. The response variable is Diabetes_binary, which represent whether a person has diabetes or not. The data has other 21 variables. Based on the exploratory data analysis (EDA) results, the following variables are identified as potential predictors of Diabetes_binary:<br>
+- <strong>High Blood Pressure (HighBP)</strong>: whether an individual has high blood pressure.<br>
+- <strong>High Cholesterol (HighChol)</strong>: whether an individual has high cholesterol.<br>
+- <strong>Body Mass Index (BMI)</strong>: body mass index<br>
+- <strong>Stroke</strong>: whether an individual has ever had a stroke.<br>
+- <strong>Heart Disease or Attack (HeartDiseaseorAttack)</strong>: whether an individual has ever had heart disease or a heart attack.<br>
+- <strong>Physical Activity (PhysActivity)</strong>: whether an individual has engaged in physical activity in the past month.<br>
+- <strong>Fruits Consumption (Fruits)</strong>: whether an individual consumes fruits daily.<br>
+- <strong>Vegetables Consumption (Veggies)</strong>: whether an individual consumes vegetables daily.<br>
+- <strong>Heavy Alcohol Consumption (HvyAlcoholConsump)</strong>: whether an individual engages in heavy alcohol consumption.<br>
+- <strong>General Health (GenHlth)</strong>: general health condition.<br>
+- <strong>Mental Health (MentHlth)</strong>: mental health condition.<br>
+- <strong>Physical Health (PhysHlth)</strong>: phsical health condition.<br>
+- <strong>Difficulty Walking (DiffWalk)</strong>: whether an individual has difficulty walking or climbing stairs.<br>
+- <strong>Age</strong><br>
+- <strong>Education</strong><br>
+- <strong>Income</strong></p>
+<p>The goal of this project is to develop a predictive model that can accurately classify individuals as having diabetes or not based on their health and demographic profiles. This model can be valuable for early detection and prevention strategies, allowing healthcare providers to identify at-risk individuals and implement targeted interventions to manage or mitigate the risk of diabetes.</p>
 </section>
-<section id="running-code" class="level2">
-<h2 class="anchored" data-anchor-id="running-code">Running Code</h2>
-<p>When you click the <strong>Render</strong> button a document will be generated that includes both content and the output of embedded code. You can embed code like this:</p>
+<section id="load-necessary-packages" class="level2">
+<h2 class="anchored" data-anchor-id="load-necessary-packages">load necessary packages</h2>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="dv">1</span> <span class="sc">+</span> <span class="dv">1</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-stdout">
-<pre><code>[1] 2</code></pre>
+<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(tidyverse)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Warning: package 'ggplot2' was built under R version 4.2.3</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Warning: package 'tidyr' was built under R version 4.2.3</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Warning: package 'readr' was built under R version 4.2.3</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Warning: package 'dplyr' was built under R version 4.2.3</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>── Attaching core tidyverse packages ──────────────────────── tidyverse 2.0.0 ──
+✔ dplyr     1.1.4     ✔ readr     2.1.5
+✔ forcats   1.0.0     ✔ stringr   1.5.0
+✔ ggplot2   3.5.1     ✔ tibble    3.2.1
+✔ lubridate 1.9.3     ✔ tidyr     1.3.1
+✔ purrr     1.0.1     
+── Conflicts ────────────────────────────────────────── tidyverse_conflicts() ──
+✖ dplyr::filter() masks stats::filter()
+✖ dplyr::lag()    masks stats::lag()
+ℹ Use the conflicted package (&lt;http://conflicted.r-lib.org/&gt;) to force all conflicts to become errors</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(caret)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Loading required package: lattice
+
+Attaching package: 'caret'
+
+The following object is masked from 'package:purrr':
+
+    lift</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb9"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(dplyr)</span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(glmnet)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Loading required package: Matrix
+
+Attaching package: 'Matrix'
+
+The following objects are masked from 'package:tidyr':
+
+    expand, pack, unpack
+
+Loaded glmnet 4.1-8</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb11"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(ranger)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Warning: package 'ranger' was built under R version 4.2.3</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb13"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(rpart)</span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(randomForest)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>randomForest 4.7-1.1
+Type rfNews() to see new features/changes/bug fixes.
+
+Attaching package: 'randomForest'
+
+The following object is masked from 'package:ranger':
+
+    importance
+
+The following object is masked from 'package:dplyr':
+
+    combine
+
+The following object is masked from 'package:ggplot2':
+
+    margin</code></pre>
 </div>
 </div>
-<p>You can add options to executable code like this</p>
+</section>
+<section id="prepare-data" class="level2">
+<h2 class="anchored" data-anchor-id="prepare-data">Prepare data</h2>
 <div class="cell">
+<div class="sourceCode cell-code" id="cb15"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="co"># read data with relative path</span></span>
+<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a>data <span class="ot">&lt;-</span> <span class="fu">read.csv</span>(<span class="st">"./diabetes_binary_health_indicators_BRFSS2015.csv"</span>) </span>
+<span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-4"><a href="#cb15-4" aria-hidden="true" tabindex="-1"></a><span class="co"># select variables that should be converted to 0/1 coded factors</span></span>
+<span id="cb15-5"><a href="#cb15-5" aria-hidden="true" tabindex="-1"></a>No_factor<span class="ot">&lt;-</span><span class="fu">c</span>(<span class="dv">1</span><span class="sc">:</span><span class="dv">4</span>, <span class="dv">6</span><span class="sc">:</span><span class="dv">14</span>, <span class="dv">18</span>) </span>
+<span id="cb15-6"><a href="#cb15-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-7"><a href="#cb15-7" aria-hidden="true" tabindex="-1"></a><span class="co"># Define the levels and labels</span></span>
+<span id="cb15-8"><a href="#cb15-8" aria-hidden="true" tabindex="-1"></a>levels_0_1 <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="dv">0</span>, <span class="dv">1</span>)</span>
+<span id="cb15-9"><a href="#cb15-9" aria-hidden="true" tabindex="-1"></a>labels_no_yes <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">"no"</span>, <span class="st">"yes"</span>)</span>
+<span id="cb15-10"><a href="#cb15-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-11"><a href="#cb15-11" aria-hidden="true" tabindex="-1"></a><span class="co"># Convert the selected variables to factors with levels 0 and 1 and labels No and Yes</span></span>
+<span id="cb15-12"><a href="#cb15-12" aria-hidden="true" tabindex="-1"></a>data[, No_factor] <span class="ot">&lt;-</span> <span class="fu">lapply</span>(data[, No_factor], <span class="cf">function</span>(x) {</span>
+<span id="cb15-13"><a href="#cb15-13" aria-hidden="true" tabindex="-1"></a>  <span class="fu">factor</span>(x, <span class="at">levels =</span> levels_0_1, <span class="at">labels =</span> labels_no_yes)</span>
+<span id="cb15-14"><a href="#cb15-14" aria-hidden="true" tabindex="-1"></a>})</span>
+<span id="cb15-15"><a href="#cb15-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-16"><a href="#cb15-16" aria-hidden="true" tabindex="-1"></a><span class="co"># Extract data for modeling</span></span>
+<span id="cb15-17"><a href="#cb15-17" aria-hidden="true" tabindex="-1"></a>data <span class="ot">&lt;-</span> data <span class="sc">|&gt;</span></span>
+<span id="cb15-18"><a href="#cb15-18" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(<span class="sc">-</span>CholCheck, <span class="sc">-</span>Smoker, <span class="sc">-</span>AnyHealthcare, <span class="sc">-</span>NoDocbcCost, <span class="sc">-</span>Sex)</span>
+<span id="cb15-19"><a href="#cb15-19" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-20"><a href="#cb15-20" aria-hidden="true" tabindex="-1"></a><span class="co"># check data structure</span></span>
+<span id="cb15-21"><a href="#cb15-21" aria-hidden="true" tabindex="-1"></a><span class="fu">str</span>(data)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>[1] 4</code></pre>
+<pre><code>'data.frame':   253680 obs. of  17 variables:
+ $ Diabetes_binary     : Factor w/ 2 levels "no","yes": 1 1 1 1 1 1 1 1 2 1 ...
+ $ HighBP              : Factor w/ 2 levels "no","yes": 2 1 2 2 2 2 2 2 2 1 ...
+ $ HighChol            : Factor w/ 2 levels "no","yes": 2 1 2 1 2 2 1 2 2 1 ...
+ $ BMI                 : num  40 25 28 27 24 25 30 25 30 24 ...
+ $ Stroke              : Factor w/ 2 levels "no","yes": 1 1 1 1 1 1 1 1 1 1 ...
+ $ HeartDiseaseorAttack: Factor w/ 2 levels "no","yes": 1 1 1 1 1 1 1 1 2 1 ...
+ $ PhysActivity        : Factor w/ 2 levels "no","yes": 1 2 1 2 2 2 1 2 1 1 ...
+ $ Fruits              : Factor w/ 2 levels "no","yes": 1 1 2 2 2 2 1 1 2 1 ...
+ $ Veggies             : Factor w/ 2 levels "no","yes": 2 1 1 2 2 2 1 2 2 2 ...
+ $ HvyAlcoholConsump   : Factor w/ 2 levels "no","yes": 1 1 1 1 1 1 1 1 1 1 ...
+ $ GenHlth             : num  5 3 5 2 2 2 3 3 5 2 ...
+ $ MentHlth            : num  18 0 30 0 3 0 0 0 30 0 ...
+ $ PhysHlth            : num  15 0 30 0 0 2 14 0 30 0 ...
+ $ DiffWalk            : Factor w/ 2 levels "no","yes": 2 1 2 1 1 1 1 2 2 1 ...
+ $ Age                 : num  9 7 9 11 11 10 9 11 9 8 ...
+ $ Education           : num  4 6 4 3 5 6 6 4 5 4 ...
+ $ Income              : num  3 1 8 6 4 8 7 4 1 3 ...</code></pre>
 </div>
 </div>
-<p>The <code>echo: false</code> option disables the printing of code (only output is displayed).</p>
+</section>
+<section id="split-data-7030" class="level2">
+<h2 class="anchored" data-anchor-id="split-data-7030">Split data 70/30</h2>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb17"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">5580728</span>)</span>
+<span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-3"><a href="#cb17-3" aria-hidden="true" tabindex="-1"></a>trainIndex <span class="ot">&lt;-</span> <span class="fu">createDataPartition</span>(data<span class="sc">$</span>Diabetes_binary, <span class="at">p =</span> .<span class="dv">7</span>,</span>
+<span id="cb17-4"><a href="#cb17-4" aria-hidden="true" tabindex="-1"></a>                                  <span class="at">list =</span> <span class="cn">FALSE</span>,</span>
+<span id="cb17-5"><a href="#cb17-5" aria-hidden="true" tabindex="-1"></a>                                  <span class="at">times =</span> <span class="dv">1</span>)</span>
+<span id="cb17-6"><a href="#cb17-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-7"><a href="#cb17-7" aria-hidden="true" tabindex="-1"></a>train_set <span class="ot">&lt;-</span>  data[trainIndex, ]</span>
+<span id="cb17-8"><a href="#cb17-8" aria-hidden="true" tabindex="-1"></a>test_set <span class="ot">&lt;-</span> data[<span class="sc">-</span>trainIndex, ]</span>
+<span id="cb17-9"><a href="#cb17-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-10"><a href="#cb17-10" aria-hidden="true" tabindex="-1"></a><span class="co">#check data</span></span>
+<span id="cb17-11"><a href="#cb17-11" aria-hidden="true" tabindex="-1"></a><span class="fu">dim</span>(train_set)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] 177577     17</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb19"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a><span class="fu">dim</span>(test_set)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] 76103    17</code></pre>
+</div>
+</div>
+</section>
+<section id="use-logloss-as-the-metric-to-evaluate-models" class="level2">
+<h2 class="anchored" data-anchor-id="use-logloss-as-the-metric-to-evaluate-models">Use logLoss as the metric to evaluate models</h2>
+<p>Log Loss is a performance metric for evaluating the accuracy of a classification model where the outcome is a probability value between 0 and 1. Specifically, for binary classification problems, Log Loss quantifies the uncertainty of the predictions made by the model. It penalizes false classifications, with a higher penalty for predictions that are confident but wrong.<br>
+We may prefer Log Loss over accuracy when we have a binary response variable since that accuracy only considers whether the prediction was correct or not, without accounting for the confidence of the prediction. Log Loss, on the other hand, takes into account the probability assigned to each class, penalizing confident incorrect predictions more than less confident ones. Also, in datasets with imbalanced classes, a high accuracy can be misleading if the model is biased towards the majority class. Log Loss mitigates this by penalizing misclassifications based on the predicted probabilities, providing a more accurate assessment of model performance across both classes.</p>
+</section>
+<section id="implementation-of-log-loss-with-5-fold-cross-validation" class="level2">
+<h2 class="anchored" data-anchor-id="implementation-of-log-loss-with-5-fold-cross-validation">Implementation of Log Loss with 5-Fold Cross-Validation</h2>
+<p>In our study, we will use Log Loss with 5-fold cross-validation to evaluate and select the best predictive model for the Diabetes_binary variable. Cross-validation ensures that our model generalizes well to unseen data by assessing its performance on different subsets of the dataset. By setting up a grid of tuning parameters for each model, we aim to optimize the model’s hyperparameters to achieve the lowest possible Log Loss, ensuring robust and reliable predictions.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb21"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a>trctrl <span class="ot">&lt;-</span> <span class="fu">trainControl</span>(<span class="at">method =</span> <span class="st">"cv"</span>, </span>
+<span id="cb21-2"><a href="#cb21-2" aria-hidden="true" tabindex="-1"></a>                       <span class="at">number =</span> <span class="dv">5</span>, </span>
+<span id="cb21-3"><a href="#cb21-3" aria-hidden="true" tabindex="-1"></a>                       <span class="at">summaryFunction =</span> mnLogLoss, </span>
+<span id="cb21-4"><a href="#cb21-4" aria-hidden="true" tabindex="-1"></a>                       <span class="at">classProbs =</span> <span class="cn">TRUE</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section>
+<section id="logistic-regression-models" class="level2">
+<h2 class="anchored" data-anchor-id="logistic-regression-models">Logistic Regression Models</h2>
+<p>Logistic Regression is used for modeling a binary response variable, which means the dependent variable has two possible outcomes. Unlike linear regression, which predicts continuous outcomes, logistic regression predicts the probability of an event occurring. The logistic regression model estimates the probability p that an outcome Y is equal to 1 given a set of predictor variables X.<br>
+We choose it because logistic regression is designed for binary outcomes, making it ideal for our goal of predicting diabetes status (yes/no). The coefficients in logistic regression can be interpreted as the log odds of the outcome, providing insights into the relationship between predictor variables and the likelihood of diabetes. Also, it can handle both continuous and categorical predictor variables and can be extended to multi-class classification problems.</p>
+<section id="model-1-basic-logistic-regression-with-all-identified-potential-predictors" class="level3">
+<h3 class="anchored" data-anchor-id="model-1-basic-logistic-regression-with-all-identified-potential-predictors">Model 1: Basic Logistic Regression with all identified potential predictors</h3>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb22"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Model 1: Basic Logistic Regression with all identified potential predictors</span></span>
+<span id="cb22-2"><a href="#cb22-2" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">123</span>)</span>
+<span id="cb22-3"><a href="#cb22-3" aria-hidden="true" tabindex="-1"></a>logit_model1 <span class="ot">&lt;-</span> <span class="fu">train</span>(Diabetes_binary <span class="sc">~</span> .,</span>
+<span id="cb22-4"><a href="#cb22-4" aria-hidden="true" tabindex="-1"></a>                      <span class="at">data =</span> train_set,</span>
+<span id="cb22-5"><a href="#cb22-5" aria-hidden="true" tabindex="-1"></a>                      <span class="at">method =</span> <span class="st">"glm"</span>,</span>
+<span id="cb22-6"><a href="#cb22-6" aria-hidden="true" tabindex="-1"></a>                      <span class="at">family =</span> binomial,</span>
+<span id="cb22-7"><a href="#cb22-7" aria-hidden="true" tabindex="-1"></a>                      <span class="at">trControl =</span> trctrl,</span>
+<span id="cb22-8"><a href="#cb22-8" aria-hidden="true" tabindex="-1"></a>                      <span class="at">metric =</span> <span class="st">"logLoss"</span></span>
+<span id="cb22-9"><a href="#cb22-9" aria-hidden="true" tabindex="-1"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section>
+<section id="model-2-logistic-regression-with-stepwise-selection" class="level3">
+<h3 class="anchored" data-anchor-id="model-2-logistic-regression-with-stepwise-selection">Model 2: Logistic Regression with Stepwise Selection</h3>
+<p>Use the stepwise selection to select predictors from the long list.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb23"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Model 2: Logistic Regression with Stepwise Selection</span></span>
+<span id="cb23-2"><a href="#cb23-2" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">123</span>)</span>
+<span id="cb23-3"><a href="#cb23-3" aria-hidden="true" tabindex="-1"></a>logit_model2 <span class="ot">&lt;-</span> <span class="fu">train</span>(Diabetes_binary <span class="sc">~</span> .,</span>
+<span id="cb23-4"><a href="#cb23-4" aria-hidden="true" tabindex="-1"></a>                      <span class="at">data =</span> train_set,</span>
+<span id="cb23-5"><a href="#cb23-5" aria-hidden="true" tabindex="-1"></a>                      <span class="at">method =</span> <span class="st">"glmStepAIC"</span>,</span>
+<span id="cb23-6"><a href="#cb23-6" aria-hidden="true" tabindex="-1"></a>                      <span class="at">family =</span> binomial,</span>
+<span id="cb23-7"><a href="#cb23-7" aria-hidden="true" tabindex="-1"></a>                      <span class="at">trControl =</span> trctrl,</span>
+<span id="cb23-8"><a href="#cb23-8" aria-hidden="true" tabindex="-1"></a>                      <span class="at">metric =</span> <span class="st">"logLoss"</span></span>
+<span id="cb23-9"><a href="#cb23-9" aria-hidden="true" tabindex="-1"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Start:  AIC=91449.47
+.outcome ~ HighBPyes + HighCholyes + BMI + Strokeyes + HeartDiseaseorAttackyes + 
+    PhysActivityyes + Fruitsyes + Veggiesyes + HvyAlcoholConsumpyes + 
+    GenHlth + MentHlth + PhysHlth + DiffWalkyes + Age + Education + 
+    Income
+
+                          Df Deviance   AIC
+- PhysActivityyes          1    91417 91449
+&lt;none&gt;                          91415 91449
+- Veggiesyes               1    91421 91453
+- Fruitsyes                1    91425 91457
+- DiffWalkyes              1    91429 91461
+- Education                1    91431 91463
+- Strokeyes                1    91431 91463
+- MentHlth                 1    91435 91467
+- PhysHlth                 1    91461 91493
+- Income                   1    91467 91499
+- HeartDiseaseorAttackyes  1    91542 91574
+- HvyAlcoholConsumpyes     1    91680 91712
+- HighCholyes              1    92450 92482
+- Age                      1    92687 92719
+- HighBPyes                1    93074 93106
+- GenHlth                  1    94035 94067
+- BMI                      1    94113 94145
+
+Step:  AIC=91449.38
+.outcome ~ HighBPyes + HighCholyes + BMI + Strokeyes + HeartDiseaseorAttackyes + 
+    Fruitsyes + Veggiesyes + HvyAlcoholConsumpyes + GenHlth + 
+    MentHlth + PhysHlth + DiffWalkyes + Age + Education + Income
+
+                          Df Deviance   AIC
+&lt;none&gt;                          91417 91449
+- Veggiesyes               1    91423 91453
+- Fruitsyes                1    91428 91458
+- DiffWalkyes              1    91432 91462
+- Strokeyes                1    91433 91463
+- Education                1    91433 91463
+- MentHlth                 1    91437 91467
+- PhysHlth                 1    91462 91492
+- Income                   1    91469 91499
+- HeartDiseaseorAttackyes  1    91543 91573
+- HvyAlcoholConsumpyes     1    91682 91712
+- HighCholyes              1    92451 92481
+- Age                      1    92697 92727
+- HighBPyes                1    93076 93106
+- GenHlth                  1    94063 94093
+- BMI                      1    94140 94170
+Start:  AIC=91252.79
+.outcome ~ HighBPyes + HighCholyes + BMI + Strokeyes + HeartDiseaseorAttackyes + 
+    PhysActivityyes + Fruitsyes + Veggiesyes + HvyAlcoholConsumpyes + 
+    GenHlth + MentHlth + PhysHlth + DiffWalkyes + Age + Education + 
+    Income
+
+                          Df Deviance   AIC
+- PhysActivityyes          1    91219 91251
+&lt;none&gt;                          91219 91253
+- Veggiesyes               1    91225 91257
+- Fruitsyes                1    91228 91260
+- MentHlth                 1    91229 91261
+- Education                1    91236 91268
+- Strokeyes                1    91241 91273
+- DiffWalkyes              1    91245 91277
+- PhysHlth                 1    91262 91294
+- Income                   1    91265 91297
+- HeartDiseaseorAttackyes  1    91351 91383
+- HvyAlcoholConsumpyes     1    91491 91523
+- HighCholyes              1    92254 92286
+- Age                      1    92471 92503
+- HighBPyes                1    92919 92951
+- GenHlth                  1    93786 93818
+- BMI                      1    93986 94018
+
+Step:  AIC=91250.79
+.outcome ~ HighBPyes + HighCholyes + BMI + Strokeyes + HeartDiseaseorAttackyes + 
+    Fruitsyes + Veggiesyes + HvyAlcoholConsumpyes + GenHlth + 
+    MentHlth + PhysHlth + DiffWalkyes + Age + Education + Income
+
+                          Df Deviance   AIC
+&lt;none&gt;                          91219 91251
+- Veggiesyes               1    91225 91255
+- Fruitsyes                1    91228 91258
+- MentHlth                 1    91229 91259
+- Education                1    91236 91266
+- Strokeyes                1    91241 91271
+- DiffWalkyes              1    91245 91275
+- PhysHlth                 1    91262 91292
+- Income                   1    91265 91295
+- HeartDiseaseorAttackyes  1    91351 91381
+- HvyAlcoholConsumpyes     1    91491 91521
+- HighCholyes              1    92254 92284
+- Age                      1    92475 92505
+- HighBPyes                1    92919 92949
+- GenHlth                  1    93801 93831
+- BMI                      1    94001 94031
+Start:  AIC=91304.03
+.outcome ~ HighBPyes + HighCholyes + BMI + Strokeyes + HeartDiseaseorAttackyes + 
+    PhysActivityyes + Fruitsyes + Veggiesyes + HvyAlcoholConsumpyes + 
+    GenHlth + MentHlth + PhysHlth + DiffWalkyes + Age + Education + 
+    Income
+
+                          Df Deviance   AIC
+&lt;none&gt;                          91270 91304
+- PhysActivityyes          1    91273 91305
+- Veggiesyes               1    91279 91311
+- Fruitsyes                1    91281 91313
+- Education                1    91282 91314
+- DiffWalkyes              1    91286 91318
+- MentHlth                 1    91296 91328
+- Strokeyes                1    91296 91328
+- PhysHlth                 1    91302 91334
+- Income                   1    91329 91361
+- HeartDiseaseorAttackyes  1    91401 91433
+- HvyAlcoholConsumpyes     1    91546 91578
+- HighCholyes              1    92331 92363
+- Age                      1    92537 92569
+- HighBPyes                1    92927 92959
+- GenHlth                  1    93838 93870
+- BMI                      1    93924 93956
+Start:  AIC=91321.17
+.outcome ~ HighBPyes + HighCholyes + BMI + Strokeyes + HeartDiseaseorAttackyes + 
+    PhysActivityyes + Fruitsyes + Veggiesyes + HvyAlcoholConsumpyes + 
+    GenHlth + MentHlth + PhysHlth + DiffWalkyes + Age + Education + 
+    Income
+
+                          Df Deviance   AIC
+- PhysActivityyes          1    91288 91320
+&lt;none&gt;                          91287 91321
+- Fruitsyes                1    91291 91323
+- Veggiesyes               1    91293 91325
+- MentHlth                 1    91300 91332
+- DiffWalkyes              1    91303 91335
+- Education                1    91307 91339
+- Strokeyes                1    91316 91348
+- Income                   1    91319 91351
+- PhysHlth                 1    91327 91359
+- HeartDiseaseorAttackyes  1    91417 91449
+- HvyAlcoholConsumpyes     1    91547 91579
+- HighCholyes              1    92296 92328
+- Age                      1    92519 92551
+- HighBPyes                1    92978 93010
+- GenHlth                  1    93967 93999
+- BMI                      1    94031 94063
+
+Step:  AIC=91319.5
+.outcome ~ HighBPyes + HighCholyes + BMI + Strokeyes + HeartDiseaseorAttackyes + 
+    Fruitsyes + Veggiesyes + HvyAlcoholConsumpyes + GenHlth + 
+    MentHlth + PhysHlth + DiffWalkyes + Age + Education + Income
+
+                          Df Deviance   AIC
+&lt;none&gt;                          91288 91320
+- Fruitsyes                1    91292 91322
+- Veggiesyes               1    91294 91324
+- MentHlth                 1    91300 91330
+- DiffWalkyes              1    91304 91334
+- Education                1    91308 91338
+- Strokeyes                1    91316 91346
+- Income                   1    91320 91350
+- PhysHlth                 1    91327 91357
+- HeartDiseaseorAttackyes  1    91417 91447
+- HvyAlcoholConsumpyes     1    91547 91577
+- HighCholyes              1    92296 92326
+- Age                      1    92525 92555
+- HighBPyes                1    92978 93008
+- GenHlth                  1    93986 94016
+- BMI                      1    94052 94082
+Start:  AIC=91058.46
+.outcome ~ HighBPyes + HighCholyes + BMI + Strokeyes + HeartDiseaseorAttackyes + 
+    PhysActivityyes + Fruitsyes + Veggiesyes + HvyAlcoholConsumpyes + 
+    GenHlth + MentHlth + PhysHlth + DiffWalkyes + Age + Education + 
+    Income
+
+                          Df Deviance   AIC
+- PhysActivityyes          1    91026 91058
+&lt;none&gt;                          91024 91058
+- Fruitsyes                1    91030 91062
+- Veggiesyes               1    91033 91065
+- MentHlth                 1    91037 91069
+- DiffWalkyes              1    91038 91070
+- Strokeyes                1    91040 91072
+- Education                1    91042 91074
+- PhysHlth                 1    91067 91099
+- Income                   1    91072 91104
+- HeartDiseaseorAttackyes  1    91138 91170
+- HvyAlcoholConsumpyes     1    91331 91363
+- HighCholyes              1    92118 92150
+- Age                      1    92321 92353
+- HighBPyes                1    92655 92687
+- GenHlth                  1    93653 93685
+- BMI                      1    93877 93909
+
+Step:  AIC=91057.79
+.outcome ~ HighBPyes + HighCholyes + BMI + Strokeyes + HeartDiseaseorAttackyes + 
+    Fruitsyes + Veggiesyes + HvyAlcoholConsumpyes + GenHlth + 
+    MentHlth + PhysHlth + DiffWalkyes + Age + Education + Income
+
+                          Df Deviance   AIC
+&lt;none&gt;                          91026 91058
+- Fruitsyes                1    91032 91062
+- Veggiesyes               1    91035 91065
+- MentHlth                 1    91038 91068
+- DiffWalkyes              1    91040 91070
+- Strokeyes                1    91041 91071
+- Education                1    91044 91074
+- PhysHlth                 1    91068 91098
+- Income                   1    91074 91104
+- HeartDiseaseorAttackyes  1    91139 91169
+- HvyAlcoholConsumpyes     1    91332 91362
+- HighCholyes              1    92119 92149
+- Age                      1    92331 92361
+- HighBPyes                1    92657 92687
+- GenHlth                  1    93681 93711
+- BMI                      1    93906 93936
+Start:  AIC=114092.9
+.outcome ~ HighBPyes + HighCholyes + BMI + Strokeyes + HeartDiseaseorAttackyes + 
+    PhysActivityyes + Fruitsyes + Veggiesyes + HvyAlcoholConsumpyes + 
+    GenHlth + MentHlth + PhysHlth + DiffWalkyes + Age + Education + 
+    Income
+
+                          Df Deviance    AIC
+- PhysActivityyes          1   114060 114092
+&lt;none&gt;                         114059 114093
+- Veggiesyes               1   114068 114100
+- Fruitsyes                1   114069 114101
+- MentHlth                 1   114079 114111
+- Education                1   114079 114111
+- DiffWalkyes              1   114080 114112
+- Strokeyes                1   114085 114117
+- PhysHlth                 1   114110 114142
+- Income                   1   114118 114150
+- HeartDiseaseorAttackyes  1   114217 114249
+- HvyAlcoholConsumpyes     1   114403 114435
+- HighCholyes              1   115367 115399
+- Age                      1   115639 115671
+- HighBPyes                1   116143 116175
+- GenHlth                  1   117324 117356
+- BMI                      1   117487 117519
+
+Step:  AIC=114092
+.outcome ~ HighBPyes + HighCholyes + BMI + Strokeyes + HeartDiseaseorAttackyes + 
+    Fruitsyes + Veggiesyes + HvyAlcoholConsumpyes + GenHlth + 
+    MentHlth + PhysHlth + DiffWalkyes + Age + Education + Income
+
+                          Df Deviance    AIC
+&lt;none&gt;                         114060 114092
+- Veggiesyes               1   114069 114099
+- Fruitsyes                1   114070 114100
+- MentHlth                 1   114079 114109
+- Education                1   114081 114111
+- DiffWalkyes              1   114082 114112
+- Strokeyes                1   114086 114116
+- PhysHlth                 1   114110 114140
+- Income                   1   114119 114149
+- HeartDiseaseorAttackyes  1   114218 114248
+- HvyAlcoholConsumpyes     1   114404 114434
+- HighCholyes              1   115367 115397
+- Age                      1   115649 115679
+- HighBPyes                1   116144 116174
+- GenHlth                  1   117354 117384
+- BMI                      1   117517 117547</code></pre>
+</div>
+</div>
+</section>
+<section id="model-3-logistic-regression-with-interaction-terms" class="level3">
+<h3 class="anchored" data-anchor-id="model-3-logistic-regression-with-interaction-terms">Model 3: Logistic Regression with interaction Terms</h3>
+<p>Based on EDA results, GenHealth is highly correlated with MentHlth as well as PhysHlth. Also, MentHlth and PhysHlth are correlated. Thus, in model 3, we removed the GenHealth and include teh interaction between MentHlth and PhysHlth.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb25"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Model 3: Logistic Regression with Lasso Regularization </span></span>
+<span id="cb25-2"><a href="#cb25-2" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">123</span>)</span>
+<span id="cb25-3"><a href="#cb25-3" aria-hidden="true" tabindex="-1"></a>logit_model3 <span class="ot">&lt;-</span> <span class="fu">train</span>(Diabetes_binary <span class="sc">~</span> HighBP <span class="sc">+</span> HighChol <span class="sc">+</span>  BMI <span class="sc">+</span> </span>
+<span id="cb25-4"><a href="#cb25-4" aria-hidden="true" tabindex="-1"></a>                        Stroke <span class="sc">+</span> HeartDiseaseorAttack <span class="sc">+</span> PhysActivity <span class="sc">+</span></span>
+<span id="cb25-5"><a href="#cb25-5" aria-hidden="true" tabindex="-1"></a>                        Fruits <span class="sc">+</span> Veggies <span class="sc">+</span> HvyAlcoholConsump <span class="sc">+</span> </span>
+<span id="cb25-6"><a href="#cb25-6" aria-hidden="true" tabindex="-1"></a>                        MentHlth<span class="sc">*</span>PhysHlth <span class="sc">+</span>  DiffWalk <span class="sc">+</span> Age <span class="sc">+</span> Education <span class="sc">+</span> Income,</span>
+<span id="cb25-7"><a href="#cb25-7" aria-hidden="true" tabindex="-1"></a>                      <span class="at">data =</span> train_set,</span>
+<span id="cb25-8"><a href="#cb25-8" aria-hidden="true" tabindex="-1"></a>                      <span class="at">method =</span> <span class="st">"glm"</span>,</span>
+<span id="cb25-9"><a href="#cb25-9" aria-hidden="true" tabindex="-1"></a>                      <span class="at">family =</span> binomial,</span>
+<span id="cb25-10"><a href="#cb25-10" aria-hidden="true" tabindex="-1"></a>                      <span class="at">trControl =</span> trctrl,</span>
+<span id="cb25-11"><a href="#cb25-11" aria-hidden="true" tabindex="-1"></a>                      <span class="at">metric =</span> <span class="st">"logLoss"</span></span>
+<span id="cb25-12"><a href="#cb25-12" aria-hidden="true" tabindex="-1"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section>
+<section id="compare-models" class="level3">
+<h3 class="anchored" data-anchor-id="compare-models">Compare models</h3>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb26"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Summarize the results</span></span>
+<span id="cb26-2"><a href="#cb26-2" aria-hidden="true" tabindex="-1"></a>results <span class="ot">&lt;-</span> <span class="fu">resamples</span>(<span class="fu">list</span>(</span>
+<span id="cb26-3"><a href="#cb26-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">Model1 =</span> logit_model1,</span>
+<span id="cb26-4"><a href="#cb26-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">Model2 =</span> logit_model2,</span>
+<span id="cb26-5"><a href="#cb26-5" aria-hidden="true" tabindex="-1"></a>  <span class="at">Model3 =</span> logit_model3</span>
+<span id="cb26-6"><a href="#cb26-6" aria-hidden="true" tabindex="-1"></a>))</span>
+<span id="cb26-7"><a href="#cb26-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-8"><a href="#cb26-8" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(results)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>
+Call:
+summary.resamples(object = results)
+
+Models: Model1, Model2, Model3 
+Number of resamples: 5 
+
+logLoss 
+            Min.   1st Qu.    Median      Mean   3rd Qu.      Max. NA's
+Model1 0.3188326 0.3206710 0.3209088 0.3212773 0.3215952 0.3243789    0
+Model2 0.3188182 0.3206797 0.3209088 0.3212754 0.3215950 0.3243754    0
+Model3 0.3279369 0.3289130 0.3307234 0.3304687 0.3314235 0.3333465    0</code></pre>
+</div>
+</div>
+<p>Model1 has the lowest log-loss, thus, we select logit_model2, which is:</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb28"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb28-1"><a href="#cb28-1" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(logit_model2)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>
+Call:
+NULL
+
+Deviance Residuals: 
+    Min       1Q   Median       3Q      Max  
+-2.7838  -0.5348  -0.3171  -0.1842   3.4002  
+
+Coefficients:
+                          Estimate Std. Error z value Pr(&gt;|z|)    
+(Intercept)             -6.6275133  0.0715371 -92.644  &lt; 2e-16 ***
+HighBPyes                0.7869715  0.0175817  44.761  &lt; 2e-16 ***
+HighCholyes              0.5810615  0.0162062  35.854  &lt; 2e-16 ***
+BMI                      0.0624992  0.0010688  58.476  &lt; 2e-16 ***
+Strokeyes                0.1551061  0.0300089   5.169 2.36e-07 ***
+HeartDiseaseorAttackyes  0.2666938  0.0210560  12.666  &lt; 2e-16 ***
+Fruitsyes               -0.0522218  0.0162415  -3.215   0.0013 ** 
+Veggiesyes              -0.0576772  0.0189184  -3.049   0.0023 ** 
+HvyAlcoholConsumpyes    -0.7867895  0.0464048 -16.955  &lt; 2e-16 ***
+GenHlth                  0.5421920  0.0096734  56.050  &lt; 2e-16 ***
+MentHlth                -0.0044386  0.0010106  -4.392 1.12e-05 ***
+PhysHlth                -0.0065651  0.0009316  -7.047 1.83e-12 ***
+DiffWalkyes              0.0949783  0.0200751   4.731 2.23e-06 ***
+Age                      0.1272244  0.0032667  38.945  &lt; 2e-16 ***
+Education               -0.0379208  0.0082647  -4.588 4.47e-06 ***
+Income                  -0.0319620  0.0041495  -7.703 1.33e-14 ***
+---
+Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+
+(Dispersion parameter for binomial family taken to be 1)
+
+    Null deviance: 143396  on 177576  degrees of freedom
+Residual deviance: 114060  on 177561  degrees of freedom
+AIC: 114092
+
+Number of Fisher Scoring iterations: 6</code></pre>
+</div>
+</div>
+</section>
+</section>
+<section id="classification-tree-models" class="level2">
+<h2 class="anchored" data-anchor-id="classification-tree-models">Classification Tree Models</h2>
+<p>A classification tree is a type of decision tree used for categorizing a dependent variable into distinct classes. It is a supervised learning technique that partitions the dataset into subsets based on the value of input features, creating a tree-like model of decisions. Each internal node in the tree represents a “test” on an attribute (e.g., whether an attribute is less than or greater than a certain value), each branch represents the outcome of the test, and each leaf node represents a class label (decision) or distribution of class labels.<br>
+We try classification trees because trees are easy to understand and visualize, making them useful for explaining model decisions. Also, classification trees can capture non-linear relationships between features and the target variable. It do not require normalization or standardization of features. Moreover, it can help identify the most important features in the dataset.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb30"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb30-1"><a href="#cb30-1" aria-hidden="true" tabindex="-1"></a><span class="co"># classification tree</span></span>
+<span id="cb30-2"><a href="#cb30-2" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">123</span>)</span>
+<span id="cb30-3"><a href="#cb30-3" aria-hidden="true" tabindex="-1"></a>classification_tree_model <span class="ot">&lt;-</span> <span class="fu">train</span>(Diabetes_binary <span class="sc">~</span> .,</span>
+<span id="cb30-4"><a href="#cb30-4" aria-hidden="true" tabindex="-1"></a>                            <span class="at">data =</span> train_set,</span>
+<span id="cb30-5"><a href="#cb30-5" aria-hidden="true" tabindex="-1"></a>                            <span class="at">method =</span> <span class="st">"rpart"</span>,</span>
+<span id="cb30-6"><a href="#cb30-6" aria-hidden="true" tabindex="-1"></a>                            <span class="at">trControl =</span> trctrl,</span>
+<span id="cb30-7"><a href="#cb30-7" aria-hidden="true" tabindex="-1"></a>                            <span class="at">tuneGrid =</span> <span class="fu">expand.grid</span>(<span class="at">cp =</span> <span class="fu">seq</span>(<span class="dv">0</span>, <span class="fl">0.1</span>, <span class="at">by =</span> <span class="fl">0.001</span>)),</span>
+<span id="cb30-8"><a href="#cb30-8" aria-hidden="true" tabindex="-1"></a>                            <span class="at">metric =</span> <span class="st">"logLoss"</span>)</span>
+<span id="cb30-9"><a href="#cb30-9" aria-hidden="true" tabindex="-1"></a>classification_tree_model</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>CART 
+
+177577 samples
+    16 predictor
+     2 classes: 'no', 'yes' 
+
+No pre-processing
+Resampling: Cross-Validated (5 fold) 
+Summary of sample sizes: 142062, 142061, 142061, 142062, 142062 
+Resampling results across tuning parameters:
+
+  cp     logLoss  
+  0.000  0.4128608
+  0.001  0.3546310
+  0.002  0.3547351
+  0.003  0.3547576
+  0.004  0.3651691
+  0.005  0.3651691
+  0.006  0.3945187
+  0.007  0.3945187
+  0.008  0.4037576
+  0.009  0.4037576
+  0.010  0.4037576
+  0.011  0.4037576
+  0.012  0.4037576
+  0.013  0.4037576
+  0.014  0.4037576
+  0.015  0.4037576
+  0.016  0.4037576
+  0.017  0.4037576
+  0.018  0.4037576
+  0.019  0.4037576
+  0.020  0.4037576
+  0.021  0.4037576
+  0.022  0.4037576
+  0.023  0.4037576
+  0.024  0.4037576
+  0.025  0.4037576
+  0.026  0.4037576
+  0.027  0.4037576
+  0.028  0.4037576
+  0.029  0.4037576
+  0.030  0.4037576
+  0.031  0.4037576
+  0.032  0.4037576
+  0.033  0.4037576
+  0.034  0.4037576
+  0.035  0.4037576
+  0.036  0.4037576
+  0.037  0.4037576
+  0.038  0.4037576
+  0.039  0.4037576
+  0.040  0.4037576
+  0.041  0.4037576
+  0.042  0.4037576
+  0.043  0.4037576
+  0.044  0.4037576
+  0.045  0.4037576
+  0.046  0.4037576
+  0.047  0.4037576
+  0.048  0.4037576
+  0.049  0.4037576
+  0.050  0.4037576
+  0.051  0.4037576
+  0.052  0.4037576
+  0.053  0.4037576
+  0.054  0.4037576
+  0.055  0.4037576
+  0.056  0.4037576
+  0.057  0.4037576
+  0.058  0.4037576
+  0.059  0.4037576
+  0.060  0.4037576
+  0.061  0.4037576
+  0.062  0.4037576
+  0.063  0.4037576
+  0.064  0.4037576
+  0.065  0.4037576
+  0.066  0.4037576
+  0.067  0.4037576
+  0.068  0.4037576
+  0.069  0.4037576
+  0.070  0.4037576
+  0.071  0.4037576
+  0.072  0.4037576
+  0.073  0.4037576
+  0.074  0.4037576
+  0.075  0.4037576
+  0.076  0.4037576
+  0.077  0.4037576
+  0.078  0.4037576
+  0.079  0.4037576
+  0.080  0.4037576
+  0.081  0.4037576
+  0.082  0.4037576
+  0.083  0.4037576
+  0.084  0.4037576
+  0.085  0.4037576
+  0.086  0.4037576
+  0.087  0.4037576
+  0.088  0.4037576
+  0.089  0.4037576
+  0.090  0.4037576
+  0.091  0.4037576
+  0.092  0.4037576
+  0.093  0.4037576
+  0.094  0.4037576
+  0.095  0.4037576
+  0.096  0.4037576
+  0.097  0.4037576
+  0.098  0.4037576
+  0.099  0.4037576
+  0.100  0.4037576
+
+logLoss was used to select the optimal model using the smallest value.
+The final value used for the model was cp = 0.001.</code></pre>
+</div>
+</div>
+<p>logLoss was used to select the optimal model using the smallest value. The final value used for the model was cp = 0.001.</p>
+</section>
+<section id="random-forest" class="level2">
+<h2 class="anchored" data-anchor-id="random-forest">Random Forest</h2>
+<p>A random forest is an ensemble learning method that constructs multiple decision trees during training and outputs the mode of the classes (classification) or mean prediction (regression) of the individual trees. It is an extension of bagging (Bootstrap Aggregating) and leverages the power of multiple models to improve accuracy and control over-fitting.<br>
+We want to try random forest model because it can achieve better accuracy than individual decision trees by averaging multiple trees. Also, random forests are less likely to overfit compared to individual trees.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb32"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb32-1"><a href="#cb32-1" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">123</span>)</span>
+<span id="cb32-2"><a href="#cb32-2" aria-hidden="true" tabindex="-1"></a>random_forest_model <span class="ot">&lt;-</span> <span class="fu">train</span>(Diabetes_binary <span class="sc">~</span> .,</span>
+<span id="cb32-3"><a href="#cb32-3" aria-hidden="true" tabindex="-1"></a>                             <span class="at">data =</span> train_set,</span>
+<span id="cb32-4"><a href="#cb32-4" aria-hidden="true" tabindex="-1"></a>                             <span class="at">method =</span> <span class="st">"ranger"</span>,</span>
+<span id="cb32-5"><a href="#cb32-5" aria-hidden="true" tabindex="-1"></a>                             <span class="at">trControl =</span> trctrl,</span>
+<span id="cb32-6"><a href="#cb32-6" aria-hidden="true" tabindex="-1"></a>                             <span class="at">tuneGrid =</span> <span class="fu">expand.grid</span>(<span class="at">mtry =</span> <span class="fu">c</span>(<span class="dv">2</span>, <span class="dv">4</span>, <span class="dv">6</span>),</span>
+<span id="cb32-7"><a href="#cb32-7" aria-hidden="true" tabindex="-1"></a>                                                    <span class="at">splitrule =</span> <span class="st">"extratrees"</span>,</span>
+<span id="cb32-8"><a href="#cb32-8" aria-hidden="true" tabindex="-1"></a>                                                    <span class="at">min.node.size =</span> <span class="fu">c</span>(<span class="dv">1</span>, <span class="dv">5</span>, <span class="dv">10</span>)),</span>
+<span id="cb32-9"><a href="#cb32-9" aria-hidden="true" tabindex="-1"></a>                             <span class="at">metric =</span> <span class="st">"logLoss"</span>,</span>
+<span id="cb32-10"><a href="#cb32-10" aria-hidden="true" tabindex="-1"></a>                             <span class="at">num.trees =</span> <span class="dv">100</span>)</span>
+<span id="cb32-11"><a href="#cb32-11" aria-hidden="true" tabindex="-1"></a>random_forest_model</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Random Forest 
+
+177577 samples
+    16 predictor
+     2 classes: 'no', 'yes' 
+
+No pre-processing
+Resampling: Cross-Validated (5 fold) 
+Summary of sample sizes: 142062, 142061, 142061, 142062, 142062 
+Resampling results across tuning parameters:
+
+  mtry  min.node.size  logLoss  
+  2      1             0.3263554
+  2      5             0.3268752
+  2     10             0.3264590
+  4      1             0.3237531
+  4      5             0.3222660
+  4     10             0.3210288
+  6      1             0.3355324
+  6      5             0.3298554
+  6     10             0.3258248
+
+Tuning parameter 'splitrule' was held constant at a value of extratrees
+logLoss was used to select the optimal model using the smallest value.
+The final values used for the model were mtry = 4, splitrule = extratrees
+ and min.node.size = 10.</code></pre>
+</div>
+</div>
+<p>logLoss was used to select the optimal model using the smallest value. The final values used for the model were mtry = 4, splitrule = extratrees and min.node.size = 10.</p>
+</section>
+<section id="final-model-selection" class="level2">
+<h2 class="anchored" data-anchor-id="final-model-selection">Final Model Selection</h2>
+<p>Now we have three best models (logit_model1, classification_tree_model, random_forest_model). Now compare all three models on the test set and declare an overall winner.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb34"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb34-1"><a href="#cb34-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Predict probabilities for the test set</span></span>
+<span id="cb34-2"><a href="#cb34-2" aria-hidden="true" tabindex="-1"></a>logit_probs <span class="ot">&lt;-</span> <span class="fu">predict</span>(logit_model1, <span class="at">newdata =</span> test_set, <span class="at">type =</span> <span class="st">"prob"</span>)</span>
+<span id="cb34-3"><a href="#cb34-3" aria-hidden="true" tabindex="-1"></a>tree_probs <span class="ot">&lt;-</span> <span class="fu">predict</span>(classification_tree_model, <span class="at">newdata =</span> test_set, <span class="at">type =</span> <span class="st">"prob"</span>)</span>
+<span id="cb34-4"><a href="#cb34-4" aria-hidden="true" tabindex="-1"></a>rf_probs <span class="ot">&lt;-</span> <span class="fu">predict</span>(random_forest_model, <span class="at">newdata =</span> test_set, <span class="at">type =</span> <span class="st">"prob"</span>)</span>
+<span id="cb34-5"><a href="#cb34-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb34-6"><a href="#cb34-6" aria-hidden="true" tabindex="-1"></a><span class="co"># Define a function to calculate log loss</span></span>
+<span id="cb34-7"><a href="#cb34-7" aria-hidden="true" tabindex="-1"></a>logLoss <span class="ot">&lt;-</span> <span class="cf">function</span>(pred_probs, actual) {</span>
+<span id="cb34-8"><a href="#cb34-8" aria-hidden="true" tabindex="-1"></a>  actual <span class="ot">&lt;-</span> <span class="fu">ifelse</span>(actual <span class="sc">==</span> <span class="fu">levels</span>(actual)[<span class="dv">1</span>], <span class="dv">0</span>, <span class="dv">1</span>)</span>
+<span id="cb34-9"><a href="#cb34-9" aria-hidden="true" tabindex="-1"></a>  <span class="sc">-</span><span class="fu">mean</span>(actual <span class="sc">*</span> <span class="fu">log</span>(pred_probs[, <span class="dv">2</span>]) <span class="sc">+</span> (<span class="dv">1</span> <span class="sc">-</span> actual) <span class="sc">*</span> <span class="fu">log</span>(pred_probs[, <span class="dv">1</span>]))</span>
+<span id="cb34-10"><a href="#cb34-10" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb34-11"><a href="#cb34-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb34-12"><a href="#cb34-12" aria-hidden="true" tabindex="-1"></a><span class="co"># Calculate log loss for each model</span></span>
+<span id="cb34-13"><a href="#cb34-13" aria-hidden="true" tabindex="-1"></a>logit_log_loss <span class="ot">&lt;-</span> <span class="fu">logLoss</span>(logit_probs, test_set<span class="sc">$</span>Diabetes_binary)</span>
+<span id="cb34-14"><a href="#cb34-14" aria-hidden="true" tabindex="-1"></a>tree_log_loss <span class="ot">&lt;-</span> <span class="fu">logLoss</span>(tree_probs, test_set<span class="sc">$</span>Diabetes_binary)</span>
+<span id="cb34-15"><a href="#cb34-15" aria-hidden="true" tabindex="-1"></a>rf_log_loss <span class="ot">&lt;-</span> <span class="fu">logLoss</span>(rf_probs, test_set<span class="sc">$</span>Diabetes_binary)</span>
+<span id="cb34-16"><a href="#cb34-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb34-17"><a href="#cb34-17" aria-hidden="true" tabindex="-1"></a><span class="co"># Print log loss values</span></span>
+<span id="cb34-18"><a href="#cb34-18" aria-hidden="true" tabindex="-1"></a><span class="fu">list</span>(<span class="at">Logit_LogLoss =</span> logit_log_loss,</span>
+<span id="cb34-19"><a href="#cb34-19" aria-hidden="true" tabindex="-1"></a>     <span class="at">Classification_Tree_LogLoss =</span> tree_log_loss,</span>
+<span id="cb34-20"><a href="#cb34-20" aria-hidden="true" tabindex="-1"></a>     <span class="at">Random_Forest_LogLoss =</span> rf_log_loss)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>$Logit_LogLoss
+[1] 0.3217086
+
+$Classification_Tree_LogLoss
+[1] 0.3554793
+
+$Random_Forest_LogLoss
+[1] 0.3209674</code></pre>
+</div>
+</div>
+<p>The random forest model has the smallest log loss, thus, the <strong>random forest model</strong> is the winner!</p>
 
 
 </section>

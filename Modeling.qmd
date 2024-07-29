@@ -35,6 +35,9 @@ library(tidyverse)
 library(caret)
 library(dplyr)
 library(glmnet)
+library(ranger)
+library(rpart)
+library(randomForest)
 ```
 
 ## Prepare data
@@ -54,27 +57,6 @@ labels_no_yes <- c("no", "yes")
 data[, No_factor] <- lapply(data[, No_factor], function(x) {
   factor(x, levels = levels_0_1, labels = labels_no_yes)
 })
-
-# Convert demographic variables to factors with labels
-data <- data |>
-  mutate (Sex=factor(Sex, levels=c(0,1), labels=c("female","male")),
-          Age=factor(Age, levels=c(1:13), labels=c("18-24","25-29","30-34",
-                                                   "35-39","40-44","45-49",
-                                                   "50-54","55-59","60-64",
-                                                   "65-69","70-74","75-79",
-                                                   "80 or older")),
-          Education=factor(Education, levels=c(1:6), 
-                           labels=c("Never attended school or only kindergarten",
-                           "Elementary", "Some high school", "High school graduate",
-                           "Some college or technical school", "College graduate")),
-          Income=factor(Income, levels=c(1:8), labels=c("less than $10,000",
-                                                        "$10,000 to less than $15,000",
-                                                        "$15,000 to less than $20,000",
-                                                        "$20,000 to less than $25,000",
-                                                        "$25,000 to less than $35,000",
-                                                        "$35,000 to less than $50,000",
-                                                        "$50,000 to less than $75,000",
-                                                        "$75,000 or more")))
 
 # Extract data for modeling
 data <- data |>
@@ -109,23 +91,135 @@ We may prefer Log Loss over accuracy when we have a binary response variable sin
 ## Implementation of Log Loss with 5-Fold Cross-Validation
 In our study, we will use Log Loss with 5-fold cross-validation to evaluate and select the best predictive model for the Diabetes_binary variable. Cross-validation ensures that our model generalizes well to unseen data by assessing its performance on different subsets of the dataset. By setting up a grid of tuning parameters for each model, we aim to optimize the model's hyperparameters to achieve the lowest possible Log Loss, ensuring robust and reliable predictions.
 ```{r}
-trctrl <- trainControl(method = "cv", number = 5, summaryFunction = mnLogLoss)
+trctrl <- trainControl(method = "cv", 
+                       number = 5, 
+                       summaryFunction = mnLogLoss, 
+                       classProbs = TRUE)
 ```
 
 ## Logistic Regression Models
 Logistic Regression is used for modeling a binary response variable, which means the dependent variable has two possible outcomes. Unlike linear regression, which predicts continuous outcomes, logistic regression predicts the probability of an event occurring. 
-The logistic regression model estimates the probability p that an outcome Y is equal to 1 given a set of predictor variables X. 
+The logistic regression model estimates the probability p that an outcome Y is equal to 1 given a set of predictor variables X.\
+We choose it because logistic regression is designed for binary outcomes, making it ideal for our goal of predicting diabetes status (yes/no). The coefficients in logistic regression can be interpreted as the log odds of the outcome, providing insights into the relationship between predictor variables and the likelihood of diabetes. Also, it can handle both continuous and categorical predictor variables and can be extended to multi-class classification problems.
 
 ### Model 1: Basic Logistic Regression with all identified potential predictors
 ```{r}
 # Model 1: Basic Logistic Regression with all identified potential predictors
 set.seed(123)
 logit_model1 <- train(Diabetes_binary ~ .,
-  data = data,
-  method = "glm",
-  family = binomial,
-  trControl = trctrl,
-  metric = "logLoss"
+                      data = train_set,
+                      method = "glm",
+                      family = binomial,
+                      trControl = trctrl,
+                      metric = "logLoss"
 )
 ```
+
+### Model 2: Logistic Regression with Stepwise Selection
+Use the stepwise selection to select predictors from the long list. 
+```{r}
+# Model 2: Logistic Regression with Stepwise Selection
+set.seed(123)
+logit_model2 <- train(Diabetes_binary ~ .,
+                      data = train_set,
+                      method = "glmStepAIC",
+                      family = binomial,
+                      trControl = trctrl,
+                      metric = "logLoss"
+)
+```
+
+### Model 3: Logistic Regression with interaction Terms
+Based on EDA results, GenHealth is highly correlated with MentHlth as well as PhysHlth. Also, MentHlth and PhysHlth are correlated. Thus, in model 3, we removed the GenHealth and include teh interaction between MentHlth and PhysHlth.
+```{r}
+# Model 3: Logistic Regression with Lasso Regularization 
+set.seed(123)
+logit_model3 <- train(Diabetes_binary ~ HighBP + HighChol +  BMI + 
+                        Stroke + HeartDiseaseorAttack + PhysActivity +
+                        Fruits + Veggies + HvyAlcoholConsump + 
+                        MentHlth*PhysHlth +  DiffWalk + Age + Education + Income,
+                      data = train_set,
+                      method = "glm",
+                      family = binomial,
+                      trControl = trctrl,
+                      metric = "logLoss"
+)
+```
+
+### Compare models
+```{r}
+# Summarize the results
+results <- resamples(list(
+  Model1 = logit_model1,
+  Model2 = logit_model2,
+  Model3 = logit_model3
+))
+
+summary(results)
+```
+Model1 has the lowest log-loss, thus, we select logit_model2, which is:
+```{r}
+summary(logit_model2)
+```
+
+## Classification Tree Models
+A classification tree is a type of decision tree used for categorizing a dependent variable into distinct classes. It is a supervised learning technique that partitions the dataset into subsets based on the value of input features, creating a tree-like model of decisions. Each internal node in the tree represents a "test" on an attribute (e.g., whether an attribute is less than or greater than a certain value), each branch represents the outcome of the test, and each leaf node represents a class label (decision) or distribution of class labels.\
+We try classification trees because trees are easy to understand and visualize, making them useful for explaining model decisions. Also, classification trees can capture non-linear relationships between features and the target variable. It do not require normalization or standardization of features. Moreover, it can help identify the most important features in the dataset. 
+```{r}
+# classification tree
+set.seed(123)
+classification_tree_model <- train(Diabetes_binary ~ .,
+                            data = train_set,
+                            method = "rpart",
+                            trControl = trctrl,
+                            tuneGrid = expand.grid(cp = seq(0, 0.1, by = 0.001)),
+                            metric = "logLoss")
+classification_tree_model
+```
+logLoss was used to select the optimal model using the smallest value. The final value used for the model was cp = 0.001.
+
+## Random Forest
+A random forest is an ensemble learning method that constructs multiple decision trees during training and outputs the mode of the classes (classification) or mean prediction (regression) of the individual trees. It is an extension of bagging (Bootstrap Aggregating) and leverages the power of multiple models to improve accuracy and control over-fitting.\
+We want to try random forest model because it can achieve better accuracy than individual decision trees by averaging multiple trees. Also, random forests are less likely to overfit compared to individual trees.
+```{r}
+set.seed(123)
+random_forest_model <- train(Diabetes_binary ~ .,
+                             data = train_set,
+                             method = "ranger",
+                             trControl = trctrl,
+                             tuneGrid = expand.grid(mtry = c(2, 4, 6),
+                                                    splitrule = "extratrees",
+                                                    min.node.size = c(1, 5, 10)),
+                             metric = "logLoss",
+                             num.trees = 100)
+random_forest_model
+```
+logLoss was used to select the optimal model using the smallest value. The final values used for the model were mtry = 4, splitrule = extratrees and min.node.size = 10.
+
+## Final Model Selection
+Now we have three best models (logit_model1, classification_tree_model, random_forest_model). Now compare all three models on the test set and declare an overall winner.
+```{r}
+# Predict probabilities for the test set
+logit_probs <- predict(logit_model1, newdata = test_set, type = "prob")
+tree_probs <- predict(classification_tree_model, newdata = test_set, type = "prob")
+rf_probs <- predict(random_forest_model, newdata = test_set, type = "prob")
+
+# Define a function to calculate log loss
+logLoss <- function(pred_probs, actual) {
+  actual <- ifelse(actual == levels(actual)[1], 0, 1)
+  -mean(actual * log(pred_probs[, 2]) + (1 - actual) * log(pred_probs[, 1]))
+}
+
+# Calculate log loss for each model
+logit_log_loss <- logLoss(logit_probs, test_set$Diabetes_binary)
+tree_log_loss <- logLoss(tree_probs, test_set$Diabetes_binary)
+rf_log_loss <- logLoss(rf_probs, test_set$Diabetes_binary)
+
+# Print log loss values
+list(Logit_LogLoss = logit_log_loss,
+     Classification_Tree_LogLoss = tree_log_loss,
+     Random_Forest_LogLoss = rf_log_loss)
+```
+The random forest model has the smallest log loss, thus, the **random forest model** is the winner!
+
 
