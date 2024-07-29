@@ -132,7 +132,7 @@ logit_model2 <- train(Diabetes_binary ~ .,
 ### Model 3: Logistic Regression with interaction Terms
 Based on EDA results, GenHealth is highly correlated with MentHlth as well as PhysHlth. Also, MentHlth and PhysHlth are correlated. Thus, in model 3, we removed the GenHealth and include teh interaction between MentHlth and PhysHlth.
 ```{r}
-# Model 3: Logistic Regression with Lasso Regularization 
+# Model 3: Logistic Regression with interaction Terms
 set.seed(123)
 logit_model3 <- train(Diabetes_binary ~ HighBP + HighChol +  BMI + 
                         Stroke + HeartDiseaseorAttack + PhysActivity +
