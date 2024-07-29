@@ -1,26 +1,131 @@
 ---
-title: "Modeling"
+title: "ST558 Final Project by Wenna Han - Modeling"
 format: html
 editor: visual
 ---
 
-## Quarto
+## Introduction
 
-Quarto enables you to weave together content and executable code into a finished document. To learn more about Quarto see <https://quarto.org>.
+In this study, we utilize the diabetes_binary_health_indicators_BRFSS2015.csv data (from https://www.kaggle.com/datasets/alexteboul/diabetes-health-indicators-dataset) to investigate the relationships between diabetes status and a range of health-related variables.
 
-## Running Code
+The dataset comprises 218,334 individuals without diabetes and 35,346 individuals with diabetes, encompassing various demographic, behavioral, and health status indicators. The response variable is Diabetes_binary, which represent whether a person has diabetes or not. The data has other 21 variables. Based on the exploratory data analysis (EDA) results, the following variables are identified as potential predictors of Diabetes_binary:\
+- **High Blood Pressure (HighBP)**: whether an individual has high blood pressure.\
+- **High Cholesterol (HighChol)**: whether an individual has high cholesterol.\
+- **Body Mass Index (BMI)**: body mass index\
+- **Stroke**: whether an individual has ever had a stroke.\
+- **Heart Disease or Attack (HeartDiseaseorAttack)**: whether an individual has ever had heart disease or a heart attack.\
+- **Physical Activity (PhysActivity)**: whether an individual has engaged in physical activity in the past month.\
+- **Fruits Consumption (Fruits)**: whether an individual consumes fruits daily.\
+- **Vegetables Consumption (Veggies)**: whether an individual consumes vegetables daily.\
+- **Heavy Alcohol Consumption (HvyAlcoholConsump)**: whether an individual engages in heavy alcohol consumption.\
+- **General Health (GenHlth)**: general health condition.\
+- **Mental Health (MentHlth)**: mental health condition.\
+- **Physical Health (PhysHlth)**: phsical health condition.\
+- **Difficulty Walking (DiffWalk)**: whether an individual has difficulty walking or climbing stairs.\
+- **Age**\
+- **Education**\
+- **Income**
 
-When you click the **Render** button a document will be generated that includes both content and the output of embedded code. You can embed code like this:
+The goal of this project is to develop a predictive model that can accurately classify individuals as having diabetes or not based on their health and demographic profiles. This model can be valuable for early detection and prevention strategies, allowing healthcare providers to identify at-risk individuals and implement targeted interventions to manage or mitigate the risk of diabetes.
+
+## load necessary packages
 
 ```{r}
-1 + 1
+library(tidyverse)
+library(caret)
+library(dplyr)
+library(glmnet)
 ```
 
-You can add options to executable code like this
+## Prepare data
 
 ```{r}
-#| echo: false
-2 * 2
+# read data with relative path
+data <- read.csv("./diabetes_binary_health_indicators_BRFSS2015.csv") 
+
+# select variables that should be converted to 0/1 coded factors
+No_factor<-c(1:4, 6:14, 18) 
+
+# Define the levels and labels
+levels_0_1 <- c(0, 1)
+labels_no_yes <- c("no", "yes")
+
+# Convert the selected variables to factors with levels 0 and 1 and labels No and Yes
+data[, No_factor] <- lapply(data[, No_factor], function(x) {
+  factor(x, levels = levels_0_1, labels = labels_no_yes)
+})
+
+# Convert demographic variables to factors with labels
+data <- data |>
+  mutate (Sex=factor(Sex, levels=c(0,1), labels=c("female","male")),
+          Age=factor(Age, levels=c(1:13), labels=c("18-24","25-29","30-34",
+                                                   "35-39","40-44","45-49",
+                                                   "50-54","55-59","60-64",
+                                                   "65-69","70-74","75-79",
+                                                   "80 or older")),
+          Education=factor(Education, levels=c(1:6), 
+                           labels=c("Never attended school or only kindergarten",
+                           "Elementary", "Some high school", "High school graduate",
+                           "Some college or technical school", "College graduate")),
+          Income=factor(Income, levels=c(1:8), labels=c("less than $10,000",
+                                                        "$10,000 to less than $15,000",
+                                                        "$15,000 to less than $20,000",
+                                                        "$20,000 to less than $25,000",
+                                                        "$25,000 to less than $35,000",
+                                                        "$35,000 to less than $50,000",
+                                                        "$50,000 to less than $75,000",
+                                                        "$75,000 or more")))
+
+# Extract data for modeling
+data <- data |>
+  select(-CholCheck, -Smoker, -AnyHealthcare, -NoDocbcCost, -Sex)
+
+# check data structure
+str(data)
 ```
 
-The `echo: false` option disables the printing of code (only output is displayed).
+## Split data 70/30
+
+```{r}
+set.seed(5580728)
+
+trainIndex <- createDataPartition(data$Diabetes_binary, p = .7,
+                                  list = FALSE,
+                                  times = 1)
+
+train_set <-  data[trainIndex, ]
+test_set <- data[-trainIndex, ]
+
+#check data
+dim(train_set)
+dim(test_set)
+```
+
+## Use logLoss as the metric to evaluate models
+
+Log Loss is a performance metric for evaluating the accuracy of a classification model where the outcome is a probability value between 0 and 1. Specifically, for binary classification problems, Log Loss quantifies the uncertainty of the predictions made by the model. It penalizes false classifications, with a higher penalty for predictions that are confident but wrong.\
+We may prefer Log Loss over accuracy when we have a binary response variable since that accuracy only considers whether the prediction was correct or not, without accounting for the confidence of the prediction. Log Loss, on the other hand, takes into account the probability assigned to each class, penalizing confident incorrect predictions more than less confident ones. Also, in datasets with imbalanced classes, a high accuracy can be misleading if the model is biased towards the majority class. Log Loss mitigates this by penalizing misclassifications based on the predicted probabilities, providing a more accurate assessment of model performance across both classes.
+
+## Implementation of Log Loss with 5-Fold Cross-Validation
+In our study, we will use Log Loss with 5-fold cross-validation to evaluate and select the best predictive model for the Diabetes_binary variable. Cross-validation ensures that our model generalizes well to unseen data by assessing its performance on different subsets of the dataset. By setting up a grid of tuning parameters for each model, we aim to optimize the model's hyperparameters to achieve the lowest possible Log Loss, ensuring robust and reliable predictions.
+```{r}
+trctrl <- trainControl(method = "cv", number = 5, summaryFunction = mnLogLoss)
+```
+
+## Logistic Regression Models
+Logistic Regression is used for modeling a binary response variable, which means the dependent variable has two possible outcomes. Unlike linear regression, which predicts continuous outcomes, logistic regression predicts the probability of an event occurring. 
+The logistic regression model estimates the probability p that an outcome Y is equal to 1 given a set of predictor variables X. 
+
+### Model 1: Basic Logistic Regression with all identified potential predictors
+```{r}
+# Model 1: Basic Logistic Regression with all identified potential predictors
+set.seed(123)
+logit_model1 <- train(Diabetes_binary ~ .,
+  data = data,
+  method = "glm",
+  family = binomial,
+  trControl = trctrl,
+  metric = "logLoss"
+)
+```
+
