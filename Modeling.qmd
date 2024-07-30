@@ -224,6 +224,6 @@ The random forest model has the smallest log loss, thus, the **random forest mod
 
 Save this model for future use. 
 ```{r}
-save(random_forest_model, file = "random_forest_model.RData")
+saveRDS(random_forest_model, "random_forest_model.rds") 
 ```
 
