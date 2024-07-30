@@ -222,8 +222,4 @@ list(Logit_LogLoss = logit_log_loss,
 ```
 The random forest model has the smallest log loss, thus, the **random forest model** is the winner!
 
-Save this model for future use. 
-```{r}
-save(random_forest_model, file = "random_forest_model.RData")
-```
-
+S
