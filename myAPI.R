@@ -25,24 +25,9 @@ data[, No_factor] <- lapply(data[, No_factor], function(x) {
 # Extract data for modeling
 data <- data |>
    select(-CholCheck, -Smoker, -AnyHealthcare, -NoDocbcCost, -Sex)
- 
-# set traincontrol
-trctrl <- trainControl(method = "cv", 
-                       number = 5, 
-                        summaryFunction = mnLogLoss, 
-                        classProbs = TRUE)
- 
-# train model
-set.seed(123)
-random_forest_model <- train(Diabetes_binary ~ .,
-                              data = data,
-                              method = "ranger",
-                              trControl = trctrl,
-                              tuneGrid = expand.grid(mtry = c(2, 4, 6),
-                                                     splitrule = "extratrees",
-                                                     min.node.size = c(1, 5, 10)),
-                              metric = "logLoss",
-                              num.trees = 100)
+
+# load the trained model
+load("random_forest_model.RData")
 
 #* @apiTitle Diabetes Prediction API
 
@@ -116,6 +101,6 @@ function() {
 
 
 # Example function calls
-# curl -X POST "http://localhost:8000/pred"
-# curl -X POST "http://localhost:8000/pred" -d "Age=1&Education=1"
-# curl -X GET "http://localhost:8000/info"
+# curl -X GET "http://127.0.0.1:8363/pred"
+# curl -X GET "http://127.0.0.1:8363/pred" -d "Age=1&Education=1"
+# curl -X GET "http://127.0.0.1:8363/info"
