@@ -614,7 +614,7 @@ Step:  AIC=114092
 <h3 class="anchored" data-anchor-id="model-3-logistic-regression-with-interaction-terms">Model 3: Logistic Regression with interaction Terms</h3>
 <p>Based on EDA results, GenHealth is highly correlated with MentHlth as well as PhysHlth. Also, MentHlth and PhysHlth are correlated. Thus, in model 3, we removed the GenHealth and include teh interaction between MentHlth and PhysHlth.</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb25"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Model 3: Logistic Regression with Lasso Regularization </span></span>
+<div class="sourceCode cell-code" id="cb25"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Model 3: Logistic Regression with interaction Terms</span></span>
 <span id="cb25-2"><a href="#cb25-2" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">123</span>)</span>
 <span id="cb25-3"><a href="#cb25-3" aria-hidden="true" tabindex="-1"></a>logit_model3 <span class="ot">&lt;-</span> <span class="fu">train</span>(Diabetes_binary <span class="sc">~</span> HighBP <span class="sc">+</span> HighChol <span class="sc">+</span>  BMI <span class="sc">+</span> </span>
 <span id="cb25-4"><a href="#cb25-4" aria-hidden="true" tabindex="-1"></a>                        Stroke <span class="sc">+</span> HeartDiseaseorAttack <span class="sc">+</span> PhysActivity <span class="sc">+</span></span>
@@ -916,6 +916,10 @@ $Random_Forest_LogLoss
 </div>
 </div>
 <p>The random forest model has the smallest log loss, thus, the <strong>random forest model</strong> is the winner!</p>
+<p>Save this model for future use.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb36"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb36-1"><a href="#cb36-1" aria-hidden="true" tabindex="-1"></a><span class="fu">save</span>(random_forest_model, <span class="at">file =</span> <span class="st">"random_forest_model.RData"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
 
 
 </section>
