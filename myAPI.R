@@ -1,10 +1,7 @@
 ## load necessary packages
-library(tidyverse)
 library(caret)
 library(dplyr)
-library(glmnet)
 library(ranger)
-library(rpart)
 library(randomForest)
 
 # read data with relative path
@@ -24,10 +21,11 @@ data[, No_factor] <- lapply(data[, No_factor], function(x) {
  
 # Extract data for modeling
 data <- data |>
-   select(-CholCheck, -Smoker, -AnyHealthcare, -NoDocbcCost, -Sex)
+  select(-CholCheck, -Smoker, -AnyHealthcare, -NoDocbcCost, -Sex)
 
-# load the trained model
-load("random_forest_model.RData")
+# train model
+set.seed(123)
+random_forest_model <- readRDS("random_forest_model.rds")
 
 #* @apiTitle Diabetes Prediction API
 
@@ -86,7 +84,7 @@ function(
     Income = as.numeric(Income)
   )
   
-  prediction <- predict(logit_model1, newdata = new_data, type = "prob")
+  prediction <- predict(random_forest_model, newdata = new_data, type = "prob")
   list(prediction = prediction[, "yes"])
 }
 
@@ -98,7 +96,6 @@ function() {
     url = "https://wennahan.github.io/ST558_Final_Project/"
   )
 }
-
 
 # Example function calls
 # curl -X GET "http://127.0.0.1:8363/pred"
