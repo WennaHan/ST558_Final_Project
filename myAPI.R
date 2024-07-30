@@ -98,6 +98,6 @@ function() {
 }
 
 # Example function calls
-# curl -X GET "http://127.0.0.1:8363/pred"
-# curl -X GET "http://127.0.0.1:8363/pred" -d "Age=1&Education=1"
-# curl -X GET "http://127.0.0.1:8363/info"
+# curl -X GET "http://127.0.0.1:8000/pred"
+# curl -X GET "http://127.0.0.1:8000/pred" -d "Age=1&Education=1"
+# curl -X GET "http://127.0.0.1:8000/info"
