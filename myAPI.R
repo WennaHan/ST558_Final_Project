@@ -1,10 +1,7 @@
 ## load necessary packages
-library(tidyverse)
 library(caret)
 library(dplyr)
-library(glmnet)
 library(ranger)
-library(rpart)
 library(randomForest)
 
 # read data with relative path
@@ -34,15 +31,7 @@ trctrl <- trainControl(method = "cv",
 
 # train model
 set.seed(123)
-random_forest_model <- train(Diabetes_binary ~ .,
-                             data = data,
-                             method = "ranger",
-                             trControl = trctrl,
-                             tuneGrid = expand.grid(mtry = c(2, 4, 6),
-                                                    splitrule = "extratrees",
-                                                    min.node.size = c(1, 5, 10)),
-                             metric = "logLoss",
-                             num.trees = 100)
+random_forest_model <- readRDS("random_forest_model.rds")
 
 
 #* @apiTitle Diabetes Prediction API
@@ -64,14 +53,14 @@ random_forest_model <- train(Diabetes_binary ~ .,
 #* @param Age 1:13
 #* @param Education 1:6
 #* @param Income 1:8
-#* @post /pred
+#* @get /pred
 function(
     HighBP = names(sort(table(data$HighBP), decreasing = TRUE))[1],
     HighChol = names(sort(table(data$HighChol), decreasing = TRUE))[1],
     BMI = mean(data$BMI),
     Stroke = names(sort(table(data$Stroke), decreasing = TRUE))[1],
     HeartDiseaseorAttack = names(sort(table(data$HeartDiseaseorAttack), decreasing = TRUE))[1],
-    PhysActivity = names(sort(table(data$SPhysActivity), decreasing = TRUE))[1],
+    PhysActivity = names(sort(table(data$PhysActivity), decreasing = TRUE))[1],
     Fruits = names(sort(table(data$Fruits), decreasing = TRUE))[1],
     Veggies = names(sort(table(data$Veggies), decreasing = TRUE))[1],
     HvyAlcoholConsump = names(sort(table(data$HvyAlcoholConsump), decreasing = TRUE))[1],
@@ -93,9 +82,9 @@ function(
     Fruits = as.factor(Fruits),
     Veggies = as.factor(Veggies),
     HvyAlcoholConsump = as.factor(HvyAlcoholConsump),
-    GenHlth = as.factor(GenHlth),
-    MentHlth = as.factor(MentHlth),
-    PhysHlth = as.factor(PhysHlth),
+    GenHlth = as.numeric(GenHlth),
+    MentHlth = as.numeric(MentHlth),
+    PhysHlth = as.numeric(PhysHlth),
     DiffWalk = as.factor(DiffWalk),
     Age = as.numeric(Age),
     Education = as.numeric(Education),
@@ -114,3 +103,5 @@ function() {
     url = "https://wennahan.github.io/ST558_Final_Project/"
   )
 }
+
+#check Hannawa
